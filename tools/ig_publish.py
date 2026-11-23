@@ -9,6 +9,7 @@ Usage:
 - prepare: same as publish but stops before media_publish; saves the carousel container id to --state.
   (Containers stay valid ~24h, so publishing can happen later at an exact time.)
 - release: media_publish the carousel saved in --state (writes --marker). Use at the publish time.
+- reel: posts OUT reel.mp4 (at --video-url) as a Reel (also shown in the feed). --prepare-only saves it to --state for a later release.
 - check: verifies graph.facebook.com is reachable and the token works. Exit 0 ok,
   2 = network blocked, 3 = token invalid/expired. Prints one JSON line.
 - publish: every card devsnack_NN becomes a carousel child in order. If devsnack_NN.mp4
@@ -156,10 +157,33 @@ def release_container(a, car, kinds, notes):
     print(json.dumps({'ok': True, 'media_id': mid, 'permalink': j.get('permalink'), 'kinds': kinds, 'notes': notes}, ensure_ascii=False))
 
 
+def reel(a):
+    marker = pathlib.Path(a.marker)
+    if marker.exists():
+        print(json.dumps({'ok': False, 'reason': 'already_posted', 'marker': str(marker)})); sys.exit(4)
+    caption = pathlib.Path(a.caption_file).read_text(encoding='utf-8')
+    code, j, _ = curl('POST', f'{a.ig_id}/media', a.token_file,
+                      {'media_type': 'REELS', 'video_url': a.video_url, 'caption': caption, 'share_to_feed': 'true'})
+    cid = j.get('id')
+    if not cid:
+        print(json.dumps({'ok': False, 'stage': 'reel_container', 'detail': err(j)}, ensure_ascii=False)); sys.exit(5)
+    deadline = time.time() + 480
+    while True:
+        time.sleep(15)
+        st, detail = status(cid, a)
+        if st == 'FINISHED': break
+        if st == 'ERROR' or time.time() > deadline:
+            print(json.dumps({'ok': False, 'stage': 'reel_status', 'detail': f'{st} {detail}'}, ensure_ascii=False)); sys.exit(5)
+    if a.prepare_only:
+        pathlib.Path(a.state).write_text(json.dumps({'carousel': cid, 'kinds': {'reel': 'REELS'}, 'notes': []}))
+        print(json.dumps({'ok': True, 'prepared': True, 'state': a.state})); return
+    release_container(a, cid, {'reel': 'REELS'}, [])
+
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument('cmd', choices=['check', 'publish', 'prepare', 'release'])
+    ap.add_argument('cmd', choices=['check', 'publish', 'prepare', 'release', 'reel'])
     ap.add_argument('--token-file', required=True); ap.add_argument('--ig-id', required=True)
-    ap.add_argument('--dir'); ap.add_argument('--base-url'); ap.add_argument('--caption-file'); ap.add_argument('--marker'); ap.add_argument('--state')
+    ap.add_argument('--dir'); ap.add_argument('--base-url'); ap.add_argument('--caption-file'); ap.add_argument('--marker'); ap.add_argument('--state'); ap.add_argument('--video-url'); ap.add_argument('--prepare-only', action='store_true')
     a = ap.parse_args()
-    {'check': check, 'publish': publish, 'prepare': publish, 'release': release}[a.cmd](a)
+    {'check': check, 'publish': publish, 'prepare': publish, 'release': release, 'reel': reel}[a.cmd](a)
