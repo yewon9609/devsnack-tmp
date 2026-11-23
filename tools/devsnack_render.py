@@ -143,7 +143,7 @@ def cover(c, total, date):
         side = f'<div class="pulse" style="position: absolute; left: 470px; top: 230px">{pixel_svg(ICONS[icon2], 9)}</div>'
     bubble = ''
     if cv.get('bubble'):
-        bubble = f'''<div style="position: absolute; right: 110px; top: 300px; background: {TX}; color: {DEEP}; {MONO}; font-weight: 700; font-size: 34px; padding: 18px 26px; border: 6px solid {DEEP}; box-shadow: 6px 6px 0 {ACC}"><span class="type" style="--n: {len(cv['bubble'])}">{H.escape(cv['bubble'])}</span></div>'''
+        bubble = f'''<div style="position: absolute; right: 110px; top: 300px; background: {TX}; color: {DEEP}; {MONO}; font-weight: 700; font-size: 34px; padding: 18px 26px; border: 6px solid {DEEP}; box-shadow: 6px 6px 0 {ACC}"><span class="type" style="--n: {sum(2 if ord(ch) > 0x2E80 else 1 for ch in cv['bubble'])}">{H.escape(cv['bubble'])}</span></div>'''
     return f'''<div style="width: 1080px; height: 1350px; position: relative; overflow: hidden; background: {DEEP}; color: {TX}; {SANS}; word-break: keep-all">
 <div style="position: absolute; inset: 0">{stars(cv.get('title', ''))}</div>
 <div style="position: absolute; left: 0; right: 0; top: 640px; height: 220px; background: repeating-linear-gradient(90deg, {PANEL} 0 96px, #262422 96px 102px)"></div>
