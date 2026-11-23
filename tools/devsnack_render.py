@@ -292,7 +292,8 @@ def main():
                 import shutil; shutil.rmtree(fr)
             f.unlink()
         b.close()
-    (out / 'caption.txt').write_text(c.get('caption', ''), encoding='utf-8')
+    cap = re.sub('([0-9#*])\ufe0f?\u20e3', '\\1\ufe0f\u20e3', c.get('caption', ''))  # keycap emoji need FE0F or they render broken
+    (out / 'caption.txt').write_text(cap, encoding='utf-8')
     print('done', total, 'cards')
 
 
