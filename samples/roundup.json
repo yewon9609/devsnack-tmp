@@ -1,0 +1,8 @@
+{"mode":"roundup","date":"2026.11.23 MON",
+"cover":{"tag":"ROUNDUP · 3","title":"오늘 개발자들이\n주목한 이슈 [[3]]","icon":"robot","icon2":"box","bubble":"오늘의 스낵 3개!","mood":"happy"},
+"slides":[
+{"tag":"AI · 연구","title":"AI 에이전트들이\nP vs NP에 도전 중","sub":"증명 과정을 실시간으로 공개","body":["여러 AI 에이전트가 협업해 증명 시도와 검증 결과를 공개해요","아직 **미해결**이고, 검증된 보조정리 수가 정답 확률을 뜻하진 않아요"],"panel":{"type":"icon","icon":"robot","caption":"agents: collaborating..."},"src":"GeekNews"},
+{"tag":"RELEASE · 웹","title":"jQuery 4.1.0\n나왔어요","sub":"직접 만든 요소도 폼에 연결","body":["직접 만든 HTML 요소(커스텀 요소)를 폼과 연결할 수 있게 됐어요","선택자 처리에서 서비스를 느리게 만들 수 있던 문제(ReDoS)도 고쳤어요"],"panel":{"type":"terminal","lines":["$ npm i jquery@4.1.0","> + form-associated custom elements","! fix: selector ReDoS"]},"src":"GeekNews"},
+{"tag":"AI · 화제","title":"OpenAI: 지능은 결국\n[[압축]]이다?","sub":"글 'Perplexity and Intelligence'","body":["다음 단어를 얼마나 잘 맞히는지(퍼플렉서티)가 AI 발전을 꾸준히 보여준 지표라는 주장","해커뉴스 첫 페이지에 오르며 토론이 이어지고 있어요"],"panel":{"type":"stat","num":"0.91","label":"GPT-4의 로그 퍼플렉서티 (GPT-3.5는 약 0.99)"},"src":"OpenAI · dev.to"}],
+"more":[{"t":"델타항공, 시스템 장애로 항공편 지연","s":"GN"},{"t":"998달러로 3.8B LLM을 직접 학습","s":"GN"},{"t":"텔레그램 안드로이드 방어 우회 RCE 주장","s":"THN"}],
+"caption":"test"}

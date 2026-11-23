@@ -1,0 +1,8 @@
+{"mode":"deep","date":"2026.11.23 MON",
+"cover":{"tag":"NEWS · 대형 장애","title":"델타항공 비행기가\n[[시스템 장애]]로 멈췄다","icon":"plane","icon2":"warn","bubble":"수동 계산 중...","mood":"sweat"},
+"slides":[
+{"tag":"무슨 일?","title":"델타항공 비행기가\n줄줄이 멈췄어요","sub":"'자동화 시스템' 장애로 애틀랜타 경유편 지연","body":["미국 여러 공항의 델타편이 함께 묶였다는 증언이 이어졌어요","국제선까지 영향을 받았다는 얘기도 나왔어요"],"panel":{"type":"terminal","lines":["$ status delta-ops","! ERROR automated system unavailable","> hub: ATL","> flights: DELAYED","> fallback: MANUAL"]},"src":"GeekNews · HN 댓글"},
+{"tag":"왜 못 떴나?","title":"비행기는 계산이 끝나야\n뜰 수 있어요","sub":"무게·무게중심 계산을 손으로","body":["이륙 전엔 승객과 짐의 무게, 무게중심을 계산해야 해요","자동 시스템이 멈추자 사람이 직접 계산하느라 대기가 길어졌어요"],"panel":{"type":"icon","icon":"plane","caption":"weight & balance: MANUAL"},"src":"HN 댓글(승객 증언)"},
+{"tag":"현장 상황","title":"기내에서 3시간,\n결국 다시 내렸다","sub":"미 교통부 규정 때문에 하기","body":["수작업 담당 인력이 애틀랜타에 있었다는 말도 나왔어요","계산 시스템 문제인지 데이터를 넘겨주는 상위 시스템 문제인지는 아직 불분명"],"panel":{"type":"stat","num":"3시간","label":"시애틀 공항 기내 대기 (승객 증언)"},"src":"HN 댓글"},
+{"tag":"개발자 관점","title":"백업 절차도\n[[병목]]이 될 수 있다","sub":"장애 대응에서 배울 점","body":["자동화가 멈출 때 쓰는 수동 절차가 한곳에 몰려 있으면 그게 새 병목이 돼요","평소에 수동 전환 연습과 담당 분산이 필요해요"],"panel":{"type":"icon","icon":"server","caption":"single point of failure"}}],
+"caption":"test"}
