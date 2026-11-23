@@ -293,6 +293,8 @@ def main():
             f.unlink()
         b.close()
     cap = re.sub('([0-9#*])\ufe0f?\u20e3', '\\1\ufe0f\u20e3', c.get('caption', ''))  # keycap emoji need FE0F or they render broken
+    cap = re.sub(r'(?m)^출처\s*:.*\n?', '', cap)  # no source line in caption (sources stay on cards)
+    cap = re.sub(r'\n{3,}', '\n\n', cap)
     (out / 'caption.txt').write_text(cap, encoding='utf-8')
     print('done', total, 'cards')
 
