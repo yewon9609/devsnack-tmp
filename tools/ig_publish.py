@@ -6,6 +6,9 @@ Usage:
   python3 tools/ig_publish.py publish --token-file F --ig-id ID --dir OUT --base-url URL
                                       --caption-file OUT/caption.txt --marker posted/YYYYMMDD
 
+- prepare: same as publish but stops before media_publish; saves the carousel container id to --state.
+  (Containers stay valid ~24h, so publishing can happen later at an exact time.)
+- release: media_publish the carousel saved in --state (writes --marker). Use at the publish time.
 - check: verifies graph.facebook.com is reachable and the token works. Exit 0 ok,
   2 = network blocked, 3 = token invalid/expired. Prints one JSON line.
 - publish: every card devsnack_NN becomes a carousel child in order. If devsnack_NN.mp4
@@ -69,6 +72,11 @@ def create(a, kind, url):
     return j.get('id'), (None if j.get('id') else err(j))
 
 
+def release(a):
+    st = json.loads(pathlib.Path(a.state).read_text())
+    release_container(a, st['carousel'], st['kinds'], st['notes'])
+
+
 def publish(a):
     marker = pathlib.Path(a.marker)
     if marker.exists():
@@ -123,6 +131,20 @@ def publish(a):
         if st == 'ERROR' or time.time() > deadline:
             print(json.dumps({'ok': False, 'stage': 'carousel_status', 'detail': f'{st} {detail}', 'notes': notes}, ensure_ascii=False)); sys.exit(5)
         time.sleep(10)
+    if a.cmd == 'prepare':
+        pathlib.Path(a.state).write_text(json.dumps({'carousel': car, 'kinds': {c: kids[c][0] for c in cards}, 'notes': notes}))
+        print(json.dumps({'ok': True, 'prepared': True, 'state': a.state, 'kinds': {c: kids[c][0] for c in cards}, 'notes': notes}, ensure_ascii=False))
+        return
+    release_container(a, car, {c: kids[c][0] for c in cards}, notes)
+
+
+def release_container(a, car, kinds, notes):
+    marker = pathlib.Path(a.marker)
+    if marker.exists():
+        print(json.dumps({'ok': False, 'reason': 'already_posted', 'marker': str(marker)})); sys.exit(4)
+    st, detail = status(car, a)
+    if st != 'FINISHED':
+        print(json.dumps({'ok': False, 'stage': 'carousel_status', 'detail': f'{st} {detail}'}, ensure_ascii=False)); sys.exit(5)
     # 4) publish (once)
     code, j, _ = curl('POST', f'{a.ig_id}/media_publish', a.token_file, {'creation_id': car})
     mid = j.get('id')
@@ -131,14 +153,13 @@ def publish(a):
     marker.parent.mkdir(parents=True, exist_ok=True)
     marker.write_text(json.dumps({'media_id': mid, 'time': time.strftime('%Y-%m-%dT%H:%M:%S%z')}))
     _, j, _ = curl('GET', mid, a.token_file, {'fields': 'permalink'})
-    kinds = {c: kids[c][0] for c in cards}
     print(json.dumps({'ok': True, 'media_id': mid, 'permalink': j.get('permalink'), 'kinds': kinds, 'notes': notes}, ensure_ascii=False))
 
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument('cmd', choices=['check', 'publish'])
+    ap.add_argument('cmd', choices=['check', 'publish', 'prepare', 'release'])
     ap.add_argument('--token-file', required=True); ap.add_argument('--ig-id', required=True)
-    ap.add_argument('--dir'); ap.add_argument('--base-url'); ap.add_argument('--caption-file'); ap.add_argument('--marker')
+    ap.add_argument('--dir'); ap.add_argument('--base-url'); ap.add_argument('--caption-file'); ap.add_argument('--marker'); ap.add_argument('--state')
     a = ap.parse_args()
-    check(a) if a.cmd == 'check' else publish(a)
+    {'check': check, 'publish': publish, 'prepare': publish, 'release': release}[a.cmd](a)
