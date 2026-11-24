@@ -21,6 +21,7 @@ Moods: happy, sweat, shock.
 Cover scene (optional, replaces the cover icon): "scene": {"type": "badge", "org": "NVIDIA", "name": "JENSEN HUANG", "role": "CEO", "from": "RESIGNED", "to": "RETURNED"}
   -> staff ID card with a generic silhouette; stamp "from" flips to "to" (people/role-change stories, never a real photo).
 Panel "chart": {"type": "chart", "values": [..], "labels": [..], "num": "+31%", "label": "..."} -> rising bars (only real numbers).
+Cover "mascot": cookie (default) | gpu | server | robot  -> pick the character that fits the story (vary it; no brand logos).
 Icons also: person (generic silhouette), trend.  [[text]] in titles = orange highlight.
 """
 import json, os, random, re, sys, pathlib, html as H
@@ -70,6 +71,16 @@ MASCOT = {
  'base': ["....KKKKKKK.....", "..KKLLLLLLLKK...", ".KLLCCCCCCCLLK..", ".KLCCDCCCCCCLK..", "KLCCCCCCCDCCCLK.",
           "KLCCWKCCCWKCCLK.", "KLCCKKCCCKKCCLK.", "KLCDCCCCCCCDCLK.", "KLCCCCMMMCCCCLK.", "KLCCCCCCCCCCCLK.",
           ".KLCCDCCCCDCLK..", ".KLLCCCCCCCLLK..", "..KKLLLLLLLKK...", "....KKKKKKK....."],
+}
+CHARS = {
+ 'gpu': ["KKKKKKKKKKKKKKKKKK..", "KhhhhhhhhhhhhhhhhKK.", "KhGGGGGhhhhGGGGGhKOK", "KGGhhhGGhhGGhhhGGKOK",
+         "KGhhKhhGhhGhhKhhGKOK", "KGGhhhGGhhGGhhhGGKOK", "KhGGGGGhhhhGGGGGhKOK", "KhhhhhhhhhhhhhhhhKOK",
+         "KhhhWKhhhhhhWKhhhKOK", "KhhhKKhhhhhhKKhhhKOK", "KhhhhhhhKKKhhhhhhKK.", "KKKKKKKKKKKKKKKKKK..",
+         ".KOKOKOKOKOK........"],
+ 'server': ["KKKKKKKKKKKKKK", "KhhhhhhhhhhhhK", "KhWKhhhhhWKhhK", "KhKKhhhhhKKhhK", "KhhhhKKKKhhhhK", "KKKKKKKKKKKKKK",
+            "KhNhhhhhhhOhhK", "KhhhhhhhhhhhhK", "KKKKKKKKKKKKKK", "KhNhhhhhhhRhhK", "KKKKKKKKKKKKKK"],
+ 'robot': ["......KK......", "......KO......", "...KKKKKKKK...", "..KWWWWWWWWK..", "..KWKKWWKKWK..", "..KWKKWWKKWK..",
+           "..KWWWWWWWWK..", "..KWWKKKKWWK..", "...KKKKKKKK...", "..KhhhhhhhhK..", ".KKhOhhhhOhKK.", "..KKKKKKKKKK.."],
 }
 MOUTH = {'happy': "KLCCCKCCCKCCCLK.", 'sweat': "KLCCCCKKKCCCCLK.", 'shock': "KLCCCCKKKCCCCLK."}
 
@@ -162,6 +173,12 @@ def cover(c, total, date):
 <div class="st1" style="position: absolute; left: 34px; top: 150px; transform: rotate(-12deg); padding: 6px 14px; border: 5px solid #E5534B; color: #E5534B; font-size: 30px; font-weight: 700; background: rgba(240,238,230,.85)">{H.escape(scene.get('from', ''))}</div>
 <div class="st2" style="position: absolute; left: 44px; top: 160px; transform: rotate(-8deg); padding: 6px 14px; border: 5px solid {ACC}; color: {ACC}; font-size: 34px; font-weight: 700; background: {TX}">{H.escape(scene.get('to', ''))}</div>
 </div></div>'''
+    ch = cv.get('mascot', 'cookie')
+    if ch in CHARS:
+        rows = CHARS[ch]; csz = int(min(340 / max(len(r) for r in rows), 260 / len(rows)))
+        char_html = f'<div class="bob" style="position: absolute; left: 610px; top: {640 - len(rows) * csz + 6}px">{pixel_svg(rows, csz)}</div>'
+    else:
+        char_html = f'<div class="bob" style="position: absolute; left: 640px; top: {640 - 14*18 + 6}px">{mascot(cv.get('mood', 'happy'), 18)}</div>'
     bubble = ''
     if cv.get('bubble'):
         bubble = f'''<div style="position: absolute; right: 110px; top: 300px; background: {TX}; color: {DEEP}; {MONO}; font-weight: 700; font-size: 34px; padding: 18px 26px; border: 6px solid {DEEP}; box-shadow: 6px 6px 0 {ACC}"><span class="type" style="--n: {sum(2 if ord(ch) > 0x2E80 else 1 for ch in cv['bubble'])}">{H.escape(cv['bubble'])}</span></div>'''
@@ -171,7 +188,7 @@ def cover(c, total, date):
 <div style="position: absolute; left: 0; right: 0; top: 640px; height: 12px; background: {LINE}"></div>
 {side}
 {main_art}
-<div class="bob" style="position: absolute; left: 640px; top: {640 - 14*18 + 6}px">{mascot(cv.get('mood', 'happy'), 18)}</div>
+{char_html}
 {bubble}
 <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 720px; background: linear-gradient(to bottom, rgba(18,17,16,0) 0%, rgba(18,17,16,0.92) 32%, {DEEP} 52%)"></div>
 <div style="position: absolute; inset: 0; box-sizing: border-box; padding: 88px; display: flex; flex-direction: column">
