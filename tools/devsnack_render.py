@@ -79,9 +79,9 @@ CHARS = {
          ".KOKOKOKOKOK........"],
  'server': ["KKKKKKKKKKKKKK", "KhhhhhhhhhhhhK", "KhWKhhhhhWKhhK", "KhKKhhhhhKKhhK", "KhhhhKKKKhhhhK", "KKKKKKKKKKKKKK",
             "KhNhhhhhhhOhhK", "KhhhhhhhhhhhhK", "KKKKKKKKKKKKKK", "KhNhhhhhhhRhhK", "KKKKKKKKKKKKKK"],
- 'robot': ["......KK......", "......KO......", "...KKKKKKKK...", "..KWWWWWWWWK..", "..KWKKWWKKWK..", "..KWKKWWKKWK..",
-           "..KWWWWWWWWK..", "..KWWKKKKWWK..", "...KKKKKKKK...", "..KhhhhhhhhK..", ".KKhOhhhhOhKK.", "..KKKKKKKKKK.."],
+
 }
+CHARS['robot'] = ICONS['robot']
 MOUTH = {'happy': "KLCCCKCCCKCCCLK.", 'sweat': "KLCCCCKKKCCCCLK.", 'shock': "KLCCCCKKKCCCCLK."}
 
 
