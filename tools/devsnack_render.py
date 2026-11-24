@@ -20,6 +20,7 @@ Icons: plane, warn, server, robot, box, chart, shield, lock, db, rocket, chip, b
 Moods: happy, sweat, shock.
 Cover scene (optional, replaces the cover icon): "scene": {"type": "badge", "org": "NVIDIA", "name": "JENSEN HUANG", "role": "CEO", "from": "RESIGNED", "to": "RETURNED"}
   -> staff ID card with a generic silhouette; stamp "from" flips to "to" (people/role-change stories, never a real photo).
+Panel "browser": {"type": "browser", "url": "ladybird.org", "badge": "NEW ENGINE"} -> address typed, page loads block by block (browsers, web services, launches).
 Panel "chart": {"type": "chart", "values": [..], "labels": [..], "num": "+31%", "label": "..."} -> rising bars (only real numbers).
 Cover "mascot": cookie (default) | gpu | server | robot  -> pick the character that fits the story (vary it; no brand logos).
 Icons also: person (generic silhouette), trend.  [[text]] in titles = orange highlight.
@@ -233,11 +234,29 @@ def count_html(num):
 def panel(p):
     t = p.get('type', 'icon')
     if t == 'terminal':
-        lines = ''.join(f'<div class="ln" style="animation-delay: {0.25 + i * 0.45:.2f}s; white-space: pre-wrap; color: {ACC if l.startswith("!") else (TX if l.startswith("$") else BODY)}">{H.escape(l)}</div>' for i, l in enumerate(p['lines']))
+        def w(l): return sum(2 if ord(ch) > 0x2E80 else 1 for ch in l)
+        t0, rows = 0.45, []
+        for i, l in enumerate(p['lines']):
+            n = max(w(l), 1); dur = min(0.06 * n, 0.9) if l.startswith('$') else 0.25
+            col = ACC if l.startswith("!") else (TX if l.startswith("$") else BODY)
+            rows.append(f'<div style="height: 1.6em; white-space: pre; color: {col}"><span class="tw-line" style="--n: {n}; animation-duration: {dur:.2f}s; animation-delay: {t0:.2f}s; animation-timing-function: steps({n})">{H.escape(l)}</span></div>')
+            t0 += dur + 0.18
+        lines = ''.join(rows)
         lines += f'<span class="blink" style="display: inline-block; width: 16px; height: 30px; background: {ACC}; margin-top: 6px"></span>'
         inner = f'''<div style="display: flex; gap: 10px; margin-bottom: 26px"><span style="width: 16px; height: 16px; border-radius: 50%; background: #E5534B"></span><span style="width: 16px; height: 16px; border-radius: 50%; background: #F2C14E"></span><span style="width: 16px; height: 16px; border-radius: 50%; background: #7BC47F"></span></div>
 <div style="{MONO}; font-size: 28px; line-height: 1.6">{lines}</div>'''
         return f'<div style="height: 440px; box-sizing: border-box; padding: 34px 40px; background: {DEEP}; border: 2px solid {BOX}; border-radius: 24px; overflow: hidden">{inner}</div>'
+    if t == 'browser':
+        url = p.get('url', ''); un = len(url)
+        blocks = ''.join(f'<div class="blk" style="animation-delay: {1.3 + i * 0.22:.2f}s; height: {h}px; width: {wd}%; background: {c}; margin-bottom: 14px"></div>' for i, (h, wd, c) in enumerate([(44, 70, TX), (18, 92, BOX), (18, 84, BOX), (18, 60, BOX), (90, 100, ACC)]))
+        return f'''<div style="height: 440px; box-sizing: border-box; background: {DEEP}; border: 2px solid {BOX}; border-radius: 24px; overflow: hidden; position: relative">
+<div style="display: flex; align-items: center; gap: 14px; padding: 18px 24px; background: {PANEL}; border-bottom: 2px solid {BOX}">
+<span style="width: 16px; height: 16px; border-radius: 50%; background: #E5534B"></span><span style="width: 16px; height: 16px; border-radius: 50%; background: #F2C14E"></span><span style="width: 16px; height: 16px; border-radius: 50%; background: #7BC47F"></span>
+<div style="flex: 1; margin-left: 10px; padding: 8px 16px; background: {DEEP}; border-radius: 8px; {MONO}; font-size: 24px; color: {TX}; white-space: pre"><span class="tw-line" style="--n: {un}; animation-duration: .7s; animation-delay: .4s; animation-timing-function: steps({un})">{H.escape(url)}</span></div></div>
+<div style="height: 8px; background: {LINE}"><div class="load" style="height: 8px; background: {ACC}"></div></div>
+<div style="padding: 30px 40px">{blocks}</div>
+<div class="in-pop" style="animation-delay: 2.5s; position: absolute; right: 30px; bottom: 30px; padding: 10px 18px; background: {ACC}; color: {DEEP}; {MONO}; font-size: 26px; font-weight: 700; transform: rotate(-4deg)">{H.escape(p.get('badge', ''))}</div>
+</div>'''
     if t == 'chart':
         vals = p['values']; mx = max(vals); n = len(vals); bw = int(560 / n) - 18
         bars = ''.join(f'<div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 260px"><div class="{"barhi" if i == n - 1 else "bar"}" style="--h: {int(240 * v / mx)}px; width: {bw}px; background: {ACC if i == n - 1 else BOX}"></div><div style="{MONO}; font-size: 20px; color: {MUTED}; margin-top: 10px">{H.escape(str(p.get("labels", [""] * n)[i]))}</div></div>' for i, v in enumerate(vals))
@@ -301,6 +320,12 @@ def outro(c, n, total):
 
 
 ANIM_CSS = """<style>
+@keyframes twl { from { max-width: 0 } to { max-width: calc(var(--n) * 1ch) } }
+.tw-line { display: inline-block; overflow: hidden; vertical-align: top; max-width: 0; animation-name: twl; animation-fill-mode: both }
+@keyframes load { 0%,22% { width: 0 } 60% { width: 70% } 80%,100% { width: 100% } }
+.load { animation: load 4.8s steps(10) infinite }
+@keyframes blk { 0% { opacity: 0; transform: translateX(-30px) } 100% { opacity: 1; transform: none } }
+.blk { opacity: 0; animation: blk .35s steps(4) both }
 @property --cnt { syntax: '<integer>'; initial-value: 0; inherits: false; }
 @keyframes count { from { --cnt: 0 } to { --cnt: var(--to) } }
 .count { animation: count 1.1s steps(14) .35s both; counter-reset: c var(--cnt) }
