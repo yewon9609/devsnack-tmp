@@ -20,6 +20,7 @@ Icons: plane, warn, server, robot, box, chart, shield, lock, db, rocket, chip, b
 Moods: happy, sweat, shock.
 Cover scene (optional, replaces the cover icon): "scene": {"type": "badge", "org": "NVIDIA", "name": "JENSEN HUANG", "role": "CEO", "from": "RESIGNED", "to": "RETURNED"}
   -> staff ID card with a generic silhouette; stamp "from" flips to "to" (people/role-change stories, never a real photo).
+Layout: content "layout": "split" (default; top = moving screen, bottom = dark text) | "classic".
 Panel "browser": {"type": "browser", "url": "ladybird.org", "badge": "NEW ENGINE"} -> address typed, page loads block by block (browsers, web services, launches).
 Panel "chart": {"type": "chart", "values": [..], "labels": [..], "num": "+31%", "label": "..."} -> rising bars (only real numbers).
 Cover "mascot": cookie (default) | gpu | server | robot  -> pick the character that fits the story (vary it; no brand logos).
@@ -295,6 +296,30 @@ def slide(s, n, total):
 </div></div>'''
 
 
+def slide_split(s, n, total):
+    """Reference-style card: top = moving 'screen' (panel scene), bottom = dark text block."""
+    body = ''.join(f'<div class="in-up" style="animation-delay: {0.62 + i * 0.12:.2f}s">{esc(b)}</div>' for i, b in enumerate(s.get('body', [])))
+    tag = f'<span class="in-left" style="animation-delay: .18s; padding: 6px 16px; border: 2px solid {ACC}; border-radius: 6px; {MONO}; font-size: 22px; font-weight: 700; color: {ACC}">{H.escape(s["tag"])}</span>' if s.get('tag') else ''
+    src = f'<span class="in-fade" style="animation-delay: .9s; {MONO}; font-size: 22px; color: {MUTED}">src: {H.escape(s["src"])}</span>' if s.get('src') else ''
+    badge = f'''<span class="in-pop" style="animation-delay: .12s; width: 84px; height: 84px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #F6B79F 0%, {ACC} 45%, #9C4A30 100%); box-shadow: inset -6px -8px 0 rgba(0,0,0,.25), 0 6px 0 #5A2A1B; color: {TX}; display: flex; align-items: center; justify-content: center; {MONO}; font-size: 44px; font-weight: 700; text-shadow: 0 3px 0 rgba(0,0,0,.35)">{n-1}</span>'''
+    return f'''<div style="width: 1080px; height: 1350px; position: relative; overflow: hidden; background: {BG}; color: {TX}; {SANS}; word-break: keep-all">
+<div style="position: absolute; left: 0; right: 0; top: 0; height: 660px; background: {DEEP}; overflow: hidden">
+<div class="grid" style="position: absolute; inset: 0; opacity: .6; background-image: radial-gradient({LINE} 2px, transparent 2px); background-size: 36px 36px"></div>
+{fx_layer(s.get('title', n), 540, 330)}
+<div style="position: absolute; left: 88px; right: 88px; top: 0; padding-top: 70px">{header(n, total)}</div>
+<div class="in-panel" style="position: absolute; left: 50%; top: 140px; width: 904px; margin-left: -452px; transform-origin: top center"><div style="transform: scale(1.15); transform-origin: top center"><div class="glow">{panel(s.get('panel', {}))}</div></div></div>
+</div>
+<div style="position: absolute; left: 0; right: 0; top: 660px; height: 6px; background: linear-gradient(90deg, {ACC}, rgba(217,119,87,0))"></div>
+<div style="position: absolute; left: 0; right: 0; top: 666px; bottom: 0; box-sizing: border-box; padding: 56px 88px 70px; display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; gap: 22px">{badge}{tag}</div>
+<h1 style="margin: 30px 0 0 0; font-size: 68px; line-height: 1.22; font-weight: 700; letter-spacing: -0.03em; overflow: hidden">{lines_in(s['title'])}</h1>
+<div class="in-up" style="animation-delay: .5s; margin-top: 20px; font-size: 34px; font-weight: 700; color: {ACC}">{esc(s.get('sub', ''))}</div>
+<div style="margin-top: 18px; font-size: 31px; line-height: 1.55; color: {BODY}">{body}</div>
+<div style="margin-top: auto; display: flex; justify-content: flex-end">{src}</div>
+{footer(n, total)}
+</div></div>'''
+
+
 def outro(c, n, total):
     rows = c.get('more', [])[:4]
     lst = ''
@@ -396,7 +421,7 @@ def main():
     c = json.load(open(sys.argv[1], encoding='utf-8')); out = pathlib.Path(sys.argv[2]).resolve(); out.mkdir(parents=True, exist_ok=True)
     for f in list(out.glob('devsnack_*.*')): f.unlink()
     total = 1 + len(c['slides']) + 1
-    pages = [cover(c, total, c.get('date', ''))] + [slide(s, i + 2, total) for i, s in enumerate(c['slides'])] + [outro(c, total, total)]
+    pages = [cover(c, total, c.get('date', ''))] + [(slide if c.get('layout') == 'classic' else slide_split)(s, i + 2, total) for i, s in enumerate(c['slides'])] + [outro(c, total, total)]
     css = font_css()
     from playwright.sync_api import sync_playwright
     with sync_playwright() as p:
