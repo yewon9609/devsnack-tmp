@@ -121,11 +121,31 @@ def font_css():
 
 def esc(s):
     s = H.escape(s)
-    s = re.sub(r'\[\[(.+?)\]\]', rf'<span style="color: {ACC}">\1</span>', s)
+    s = re.sub(r'\[\[(.+?)\]\]', rf'<span class="hl" style="color: {ACC}">\1</span>', s)
     return re.sub(r'\*\*(.+?)\*\*', rf'<b style="color: {TX}">\1</b>', s)
 
 
 def br(s): return '<br>'.join(esc(x) for x in s.split('\n'))
+
+
+def lines_in(text, base=0.25, step=0.14):
+    return ''.join(f'<span class="in-up" style="display: block; animation-delay: {base + i * step:.2f}s">{esc(x)}</span>' for i, x in enumerate(text.split('\n')))
+
+
+def fx_layer(seed, cx=540, cy=330):
+    """Pixel burst from (cx, cy) at entrance + twinkling sparks + drifting scanline."""
+    random.seed(str(seed) + 'fx'); out = []
+    for k in range(18):
+        ang = k / 18 * 6.283 + random.random() * 0.3; dist = random.randint(220, 420)
+        import math
+        dx, dy = int(math.cos(ang) * dist), int(math.sin(ang) * dist * 0.7)
+        sz = random.choice([10, 14, 18]); col = random.choice([ACC, ACC, TX, '#F2C14E'])
+        out.append(f'<div class="burst" style="position: absolute; left: {cx}px; top: {cy}px; width: {sz}px; height: {sz}px; background: {col}; --dx: {dx}px; --dy: {dy}px; animation-delay: {0.35 + random.random() * 0.15:.2f}s"></div>')
+    for k in range(14):
+        x, y = random.randint(40, 1020), random.randint(120, 1250)
+        out.append(f'<div class="spark" style="position: absolute; left: {x}px; top: {y}px; width: 8px; height: 8px; background: {random.choice([ACC, TX])}; animation-delay: -{random.random() * 2.4:.2f}s"></div>')
+    out.append(f'<div class="scan" style="position: absolute; left: 0; right: 0; height: 120px; background: linear-gradient(to bottom, rgba(217,119,87,0), rgba(217,119,87,.07), rgba(217,119,87,0))"></div>')
+    return '<div style="position: absolute; inset: 0; pointer-events: none; overflow: hidden">' + ''.join(out) + '</div>'
 
 
 def header(n, total):
@@ -196,11 +216,18 @@ def cover(c, total, date):
 <div style="margin-top: auto; display: flex; align-items: center; gap: 18px">
 <span style="padding: 8px 18px; border: 2px solid {TX}; border-radius: 6px; {MONO}; font-size: 24px; font-weight: 700">{H.escape(cv.get('tag', ''))}</span>
 <span style="{MONO}; font-size: 24px; color: {MUTED}">{H.escape(date)}</span></div>
-<h1 style="margin: 28px 0 0 0; font-size: 96px; line-height: 1.2; font-weight: 700; letter-spacing: -0.035em">{br(cv['title'])}</h1>
+<h1 style="margin: 28px 0 0 0; font-size: 96px; line-height: 1.2; font-weight: 700; letter-spacing: -0.035em; overflow: hidden">{lines_in(cv['title'], 0.2, 0.18)}</h1>
 <div style="margin-top: 44px; display: flex; justify-content: space-between; align-items: center; {MONO}; font-size: 26px">
 <span style="color: {ACC}; font-weight: 700">&gt; {BRAND}<span class="blink" style="display: inline-block; width: 14px; height: 26px; margin-left: 8px; vertical-align: -4px; background: {ACC}"></span></span>
 <span style="color: {TX}">넘겨보기 →</span></div>
 </div></div>'''
+
+
+def count_html(num):
+    m = re.match(r'^(\D*)(\d+)(.*)$', num)
+    if not m or len(m.group(2)) > 6:
+        return H.escape(num)
+    return f'{H.escape(m.group(1))}<span class="count" style="--to: {int(m.group(2))}"></span>{H.escape(m.group(3))}'
 
 
 def panel(p):
@@ -219,7 +246,7 @@ def panel(p):
 <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 18px">{bars}</div></div>'''
     if t == 'stat':
         return f'''<div style="height: 440px; box-sizing: border-box; padding: 40px; background: {PANEL}; border: 2px solid {BOX}; border-radius: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 18px">
-<div class="pop" style="{MONO}; font-size: 150px; font-weight: 700; color: {ACC}; line-height: 1">{H.escape(p['num'])}</div>
+<div class="pop" style="{MONO}; font-size: 150px; font-weight: 700; color: {ACC}; line-height: 1">{count_html(p['num'])}</div>
 <div style="width: 360px; height: 10px; background: {LINE}"><div class="fill" style="height: 10px; background: {ACC}"></div></div>
 <div style="font-size: 32px; color: {BODY}; text-align: center">{esc(p.get('label', ''))}</div></div>'''
     icon = ICONS.get(p.get('icon', 'warn'), ICONS['warn']); iw = max(len(r) for r in icon); sz = int(min(300 / iw, 260 / len(icon)))
@@ -230,20 +257,23 @@ def panel(p):
 
 
 def slide(s, n, total):
-    body = ''.join(f'<div>{esc(b)}</div>' for b in s.get('body', []))
-    tag = f'<span style="padding: 6px 16px; border: 2px solid {ACC}; border-radius: 6px; {MONO}; font-size: 22px; font-weight: 700; color: {ACC}">{H.escape(s["tag"])}</span>' if s.get('tag') else ''
-    src = f'<span style="{MONO}; font-size: 22px; color: {MUTED}">src: {H.escape(s["src"])}</span>' if s.get('src') else ''
-    return f'''<div style="width: 1080px; height: 1350px; box-sizing: border-box; padding: 88px; background: {BG}; color: {TX}; {SANS}; word-break: keep-all; display: flex; flex-direction: column">
+    body = ''.join(f'<div class="in-up" style="animation-delay: {0.62 + i * 0.12:.2f}s">{esc(b)}</div>' for i, b in enumerate(s.get('body', [])))
+    tag = f'<span class="in-left" style="animation-delay: .18s; padding: 6px 16px; border: 2px solid {ACC}; border-radius: 6px; {MONO}; font-size: 22px; font-weight: 700; color: {ACC}">{H.escape(s["tag"])}</span>' if s.get('tag') else ''
+    src = f'<span class="in-fade" style="animation-delay: .9s; {MONO}; font-size: 22px; color: {MUTED}">src: {H.escape(s["src"])}</span>' if s.get('src') else ''
+    return f'''<div style="width: 1080px; height: 1350px; box-sizing: border-box; padding: 88px; background: {BG}; color: {TX}; {SANS}; word-break: keep-all; display: flex; flex-direction: column; position: relative; overflow: hidden">
+<div class="grid" style="position: absolute; inset: 0; opacity: .5; background-image: radial-gradient({LINE} 2px, transparent 2px); background-size: 36px 36px"></div>
+{fx_layer(s.get('title', n), 540, 360)}
+<div style="position: relative; display: flex; flex-direction: column; flex: 1">
 {header(n, total)}
-<div style="margin-top: 48px">{panel(s.get('panel', {}))}</div>
+<div class="in-panel" style="margin-top: 48px"><div class="glow">{panel(s.get('panel', {}))}</div></div>
 <div style="margin-top: 52px; display: flex; align-items: center; gap: 20px">
-<span style="width: 64px; height: 64px; border-radius: 50%; background: {ACC}; color: {DEEP}; display: flex; align-items: center; justify-content: center; {MONO}; font-size: 32px; font-weight: 700">{n-1}</span>{tag}</div>
-<h1 style="margin: 26px 0 0 0; font-size: 64px; line-height: 1.25; font-weight: 700; letter-spacing: -0.03em">{br(s['title'])}</h1>
-<div style="margin-top: 18px; font-size: 34px; font-weight: 700; color: {ACC}">{esc(s.get('sub', ''))}</div>
+<span class="in-pop" style="animation-delay: .12s; width: 64px; height: 64px; border-radius: 50%; background: {ACC}; color: {DEEP}; display: flex; align-items: center; justify-content: center; {MONO}; font-size: 32px; font-weight: 700">{n-1}</span>{tag}</div>
+<h1 style="margin: 26px 0 0 0; font-size: 64px; line-height: 1.25; font-weight: 700; letter-spacing: -0.03em; overflow: hidden">{lines_in(s['title'])}</h1>
+<div class="in-up" style="animation-delay: .5s; margin-top: 18px; font-size: 34px; font-weight: 700; color: {ACC}">{esc(s.get('sub', ''))}</div>
 <div style="margin-top: 18px; font-size: 31px; line-height: 1.55; color: {BODY}">{body}</div>
 <div style="margin-top: auto; display: flex; justify-content: flex-end">{src}</div>
 {footer(n, total)}
-</div>'''
+</div></div>'''
 
 
 def outro(c, n, total):
@@ -251,11 +281,11 @@ def outro(c, n, total):
     lst = ''
     if rows:
         lst = '<div style="margin-top: 40px; font-size: 32px; color: ' + BODY + '">' + ''.join(
-            f'<div style="display: flex; justify-content: space-between; gap: 24px; padding: 22px 0; border-bottom: 1px solid {LINE}"><span>{esc(x["t"])}</span><span style="{MONO}; font-size: 22px; color: {MUTED}; white-space: nowrap; padding-top: 6px">{H.escape(x.get("s", ""))}</span></div>' for x in rows) + '</div>'
+            f'<div class="in-left" style="animation-delay: {0.3 + i * 0.18:.2f}s; display: flex; justify-content: space-between; gap: 24px; padding: 22px 0; border-bottom: 1px solid {LINE}"><span>{esc(x["t"])}</span><span style="{MONO}; font-size: 22px; color: {MUTED}; white-space: nowrap; padding-top: 6px">{H.escape(x.get("s", ""))}</span></div>' for i, x in enumerate(rows)) + '</div>'
     head = '짧게 더 보기' if rows else '한 줄로 정리하면'
     if not rows:
         lst = '<div style="margin-top: 40px; font-size: 34px; line-height: 1.5; color: ' + BODY + '">' + ''.join(
-            f'<div style="display: flex; gap: 22px; padding: 20px 0; border-bottom: 1px solid {LINE}"><span style="{MONO}; color: {ACC}; font-weight: 700">{i:02d}</span><span>{esc(s.get("sub", ""))}</span></div>' for i, s in enumerate(c['slides'], 1)) + '</div>'
+            f'<div class="in-left" style="animation-delay: {0.2 + i * 0.18:.2f}s; display: flex; gap: 22px; padding: 20px 0; border-bottom: 1px solid {LINE}"><span style="{MONO}; color: {ACC}; font-weight: 700">{i:02d}</span><span>{esc(s.get("sub", ""))}</span></div>' for i, s in enumerate(c['slides'], 1)) + '</div>'
     return f'''<div style="width: 1080px; height: 1350px; box-sizing: border-box; padding: 88px; background: {BG}; color: {TX}; {SANS}; word-break: keep-all; display: flex; flex-direction: column; position: relative; overflow: hidden">
 {header(n, total)}
 <h1 style="margin: 70px 0 0 0; font-size: 72px; line-height: 1.2; font-weight: 700; letter-spacing: -0.03em">{head}</h1>
@@ -271,6 +301,33 @@ def outro(c, n, total):
 
 
 ANIM_CSS = """<style>
+@property --cnt { syntax: '<integer>'; initial-value: 0; inherits: false; }
+@keyframes count { from { --cnt: 0 } to { --cnt: var(--to) } }
+.count { animation: count 1.1s steps(14) .35s both; counter-reset: c var(--cnt) }
+.count::after { content: counter(c) }
+@keyframes inup { 0% { transform: translateY(110%); opacity: 0 } 100% { transform: none; opacity: 1 } }
+.in-up { animation: inup .5s steps(5) both }
+@keyframes inleft { 0% { transform: translateX(-80px); opacity: 0 } 100% { transform: none; opacity: 1 } }
+.in-left { display: inline-flex; animation: inleft .45s steps(5) both }
+div.in-left { display: flex }
+@keyframes infade { 0% { opacity: 0 } 100% { opacity: 1 } }
+.in-fade { animation: infade .4s steps(4) both }
+@keyframes inpop { 0% { transform: scale(0) } 70% { transform: scale(1.25) } 100% { transform: scale(1) } }
+.in-pop { animation: inpop .45s steps(5) both }
+@keyframes inpanel { 0% { transform: scale(.82) translateY(40px); opacity: 0 } 60% { transform: scale(1.03); opacity: 1 } 100% { transform: none; opacity: 1 } }
+.in-panel { animation: inpanel .55s steps(6) .05s both }
+@keyframes glow { 0%,100% { box-shadow: 0 0 0 0 rgba(217,119,87,0) } 50% { box-shadow: 0 0 0 6px rgba(217,119,87,.35) } }
+.glow { border-radius: 24px; animation: glow 1.6s steps(4) 1s infinite }
+@keyframes burst { 0% { transform: translate(0,0) scale(1); opacity: 0 } 5% { opacity: 1 } 100% { transform: translate(var(--dx), var(--dy)) scale(.3); opacity: 0 } }
+.burst { opacity: 0; animation: burst .9s steps(7) both }
+@keyframes spark { 0%,100% { opacity: 0; transform: scale(.4) } 50% { opacity: .9; transform: scale(1.2) } }
+.spark { animation: spark 2.4s steps(4) infinite }
+@keyframes scan { 0% { top: -120px } 100% { top: 1350px } }
+.scan { animation: scan 4.8s linear infinite }
+@keyframes grid { 0% { background-position: 0 0 } 100% { background-position: 36px 36px } }
+.grid { animation: grid 2.4s steps(6) infinite }
+@keyframes hl { 0%,100% { text-shadow: none } 50% { text-shadow: 0 0 18px rgba(217,119,87,.8) } }
+.hl { animation: hl 1.2s steps(3) 1s infinite }
 @keyframes st1 { 0%,40% { opacity: 1 } 41%,100% { opacity: 0 } }
 .st1 { animation: st1 4.8s steps(1) infinite }
 @keyframes st2 { 0%,44% { opacity: 0; transform: rotate(-8deg) scale(2.2) } 50% { opacity: 1; transform: rotate(-8deg) scale(1.15) } 54%,100% { opacity: 1; transform: rotate(-8deg) scale(1) } }
@@ -331,7 +388,7 @@ def main():
             pg.screenshot(path=str(out / f'devsnack_{i:02d}.jpg'), type='jpeg', quality=92)
             if os.environ.get('DEVSNACK_VIDEO', '1') == '1' and (i == 1 or os.environ.get('DEVSNACK_VIDEO_ALL', '1') == '1'):
                 fr = out / '_frames'; fr.mkdir(exist_ok=True)
-                fps, secs = 12, 4.8
+                fps, secs = 15, 4.8
                 for k in range(int(fps * secs)):
                     pg.evaluate(f"() => document.getAnimations().forEach(a => {{ a.pause(); a.currentTime = {k * 1000 / fps}; }})")
                     pg.screenshot(path=str(fr / f'{k:04d}.png'))
