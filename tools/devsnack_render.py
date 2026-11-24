@@ -327,6 +327,19 @@ def slide(s, n, total):
 </div></div>'''
 
 
+def top_media(p):
+    if p.get('type') == 'scene':
+        svg = pathlib.Path(p['svg']).read_text(encoding='utf-8') if p.get('svg') else p.get('html', '')
+        hero = ''
+        if p.get('mascot', True):
+            hat = pixel_svg(["....YYYYYY....", "...YYYYYYYY...", "..YYYYYYYYYY..", "YYYYYYYYYYYYYY"], 10) if p.get('hat') else ''
+            hero = f'<div class="bob" style="position: absolute; left: {p.get("mx", 640)}px; top: {p.get("my", 470)}px">{hat and f"<div style=\'margin-left: 0; margin-bottom: -8px\'>{hat}</div>"}{mascot(p.get("mood", "happy"), 10)}</div>'
+            if p.get('bubble'):
+                hero += f'<div class="in-pop" style="animation-delay: .8s; position: absolute; left: {p.get("mx", 640) + 150}px; top: {p.get("my", 470) - 40}px; background: {TX}; color: {DEEP}; {MONO}; font-weight: 700; font-size: 28px; padding: 12px 18px; border: 5px solid {DEEP}; box-shadow: 5px 5px 0 {ACC}">{H.escape(p["bubble"])}</div>'
+        return f'<div class="in-fade" style="position: absolute; inset: 0">{svg}</div>{hero}'
+    return f'''<div class="in-panel" style="position: absolute; left: 50%; top: 140px; width: 904px; margin-left: -452px; transform-origin: top center"><div style="transform: scale(1.15); transform-origin: top center"><div class="glow">{panel(p)}</div></div></div>'''
+
+
 def slide_split(s, n, total):
     """Reference-style card: top = moving 'screen' (panel scene), bottom = dark text block."""
     body = ''.join(f'<div class="in-up" style="animation-delay: {0.62 + i * 0.12:.2f}s">{esc(b)}</div>' for i, b in enumerate(s.get('body', [])))
@@ -337,8 +350,8 @@ def slide_split(s, n, total):
 <div style="position: absolute; left: 0; right: 0; top: 0; height: 660px; background: {DEEP}; overflow: hidden">
 <div class="grid" style="position: absolute; inset: 0; opacity: .6; background-image: radial-gradient({LINE} 2px, transparent 2px); background-size: 36px 36px"></div>
 {fx_layer(s.get('title', n), 540, 330)}
+{top_media(s.get('panel', {}))}
 <div style="position: absolute; left: 88px; right: 88px; top: 0; padding-top: 70px">{header(n, total)}</div>
-<div class="in-panel" style="position: absolute; left: 50%; top: 140px; width: 904px; margin-left: -452px; transform-origin: top center"><div style="transform: scale(1.15); transform-origin: top center"><div class="glow">{panel(s.get('panel', {}))}</div></div></div>
 </div>
 <div style="position: absolute; left: 0; right: 0; top: 660px; height: 6px; background: linear-gradient(90deg, {ACC}, rgba(217,119,87,0))"></div>
 <div style="position: absolute; left: 0; right: 0; top: 666px; bottom: 0; box-sizing: border-box; padding: 56px 88px 70px; display: flex; flex-direction: column">
@@ -376,6 +389,13 @@ def outro(c, n, total):
 
 
 ANIM_CSS = """<style>
+@keyframes sway { 0%,100% { transform: rotate(-4deg) } 50% { transform: rotate(4deg) } }
+.sway { animation: sway 2.4s steps(6) infinite }
+@keyframes win { 0%,100% { opacity: 1 } 50% { opacity: .25 } }
+.win { animation: win 1.6s steps(2) infinite }
+.blinkr { animation: blink 1.2s steps(1) infinite }
+@keyframes spk { 0%,100% { opacity: 0 } 30% { opacity: 1 } 60% { opacity: 0 } }
+.spk { animation: spk .8s steps(3) infinite }
 @keyframes toast { 0% { transform: translateX(120%); opacity: 0 } 100% { transform: none; opacity: 1 } }
 .toast { opacity: 0; animation: toast .45s steps(5) both }
 @keyframes rise { 0% { transform: translateY(60px); opacity: 0 } 100% { transform: none; opacity: 1 } }

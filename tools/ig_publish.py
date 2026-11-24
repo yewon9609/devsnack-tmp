@@ -163,7 +163,7 @@ def reel(a):
         print(json.dumps({'ok': False, 'reason': 'already_posted', 'marker': str(marker)})); sys.exit(4)
     caption = pathlib.Path(a.caption_file).read_text(encoding='utf-8')
     code, j, _ = curl('POST', f'{a.ig_id}/media', a.token_file,
-                      {'media_type': 'REELS', 'video_url': a.video_url, 'caption': caption, 'share_to_feed': 'true'})
+                      {'media_type': 'REELS', 'video_url': a.video_url, 'caption': caption, 'share_to_feed': 'true', 'thumb_offset': os.environ.get('THUMB_MS', '0')})
     cid = j.get('id')
     if not cid:
         print(json.dumps({'ok': False, 'stage': 'reel_container', 'detail': err(j)}, ensure_ascii=False)); sys.exit(5)
