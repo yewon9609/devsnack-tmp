@@ -295,6 +295,14 @@ def main():
     cap = re.sub('([0-9#*])\ufe0f?\u20e3', '\\1\ufe0f\u20e3', c.get('caption', ''))  # keycap emoji need FE0F or they render broken
     cap = re.sub(r'(?m)^출처\s*:.*\n?', '', cap)  # no source line in caption (sources stay on cards)
     cap = re.sub(r'\n{3,}', '\n\n', cap)
+    # Instagram only links the first 5 hashtags; drop the rest so they don't show as plain words
+    seen = 0
+    def _tag(m):
+        nonlocal seen
+        seen += 1
+        return m.group(0) if seen <= 5 else ''
+    cap = re.sub(r'#[^\s#]+', _tag, cap)
+    cap = re.sub(r'[ \t]+\n', '\n', cap).rstrip() + '\n'
     (out / 'caption.txt').write_text(cap, encoding='utf-8')
     print('done', total, 'cards')
 

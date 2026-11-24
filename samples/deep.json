@@ -1,8 +1,80 @@
-{"mode":"deep","date":"2026.11.23 MON",
-"cover":{"tag":"NEWS · 대형 장애","title":"델타항공 비행기가\n[[시스템 장애]]로 멈췄다","icon":"plane","icon2":"warn","bubble":"수동 계산 중...","mood":"sweat"},
-"slides":[
-{"tag":"무슨 일?","title":"델타항공 비행기가\n줄줄이 멈췄어요","sub":"'자동화 시스템' 장애로 애틀랜타 경유편 지연","body":["미국 여러 공항의 델타편이 함께 묶였다는 증언이 이어졌어요","국제선까지 영향을 받았다는 얘기도 나왔어요"],"panel":{"type":"terminal","lines":["$ status delta-ops","! ERROR automated system unavailable","> hub: ATL","> flights: DELAYED","> fallback: MANUAL"]},"src":"GeekNews · HN 댓글"},
-{"tag":"왜 못 떴나?","title":"비행기는 계산이 끝나야\n뜰 수 있어요","sub":"무게·무게중심 계산을 손으로","body":["이륙 전엔 승객과 짐의 무게, 무게중심을 계산해야 해요","자동 시스템이 멈추자 사람이 직접 계산하느라 대기가 길어졌어요"],"panel":{"type":"icon","icon":"plane","caption":"weight & balance: MANUAL"},"src":"HN 댓글(승객 증언)"},
-{"tag":"현장 상황","title":"기내에서 3시간,\n결국 다시 내렸다","sub":"미 교통부 규정 때문에 하기","body":["수작업 담당 인력이 애틀랜타에 있었다는 말도 나왔어요","계산 시스템 문제인지 데이터를 넘겨주는 상위 시스템 문제인지는 아직 불분명"],"panel":{"type":"stat","num":"3시간","label":"시애틀 공항 기내 대기 (승객 증언)"},"src":"HN 댓글"},
-{"tag":"개발자 관점","title":"백업 절차도\n[[병목]]이 될 수 있다","sub":"장애 대응에서 배울 점","body":["자동화가 멈출 때 쓰는 수동 절차가 한곳에 몰려 있으면 그게 새 병목이 돼요","평소에 수동 전환 연습과 담당 분산이 필요해요"],"panel":{"type":"icon","icon":"server","caption":"single point of failure"}}],
-"caption":"test"}
+{
+ "mode": "deep",
+ "date": "2026.11.23 MON",
+ "cover": {
+  "tag": "NEWS · AI 전력",
+  "title": "전기 기다리다 지친\nAI의 [[선택]]",
+  "icon": "server",
+  "icon2": "warn",
+  "bubble": "뭘 골랐게?",
+  "mood": "sweat"
+ },
+ "slides": [
+  {
+   "tag": "무슨 일?",
+   "title": "정답은\n[[가스]] 87%",
+   "sub": "2028년 전력 87%가 가스일 거란 추정",
+   "body": [
+    "데이터센터 전력 구조를 분석한 글이 해커뉴스 2위에 올랐어요",
+    "2028년엔 가스 87%, 석탄 11%일 거라는 [[추정]]이에요"
+   ],
+   "panel": {
+    "type": "stat",
+    "num": "87%",
+    "label": "가스 87% · 석탄 11% (분석 글 추정)"
+   },
+   "src": "Better Data Center Project · HN"
+  },
+  {
+   "tag": "왜 그래?",
+   "title": "전력망 연결,\n[[몇 년씩]] 기다려야 해서",
+   "sub": "전력망 대기가 길어 발전기를 직접 둔다",
+   "body": [
+    "새 데이터센터를 전력망에 붙이려면 대기 줄이 몇 년이에요",
+    "가스 발전기는 빨리 세울 수 있어서 BYOP의 주력이 됐어요"
+   ],
+   "panel": {
+    "type": "terminal",
+    "lines": [
+     "$ grid connect --site new-dc",
+     "> queue position: waiting...",
+     "> ETA: years",
+     "! fallback: on-site gas (BYOP)"
+    ]
+   },
+   "src": "Modo Energy · TechRadar"
+  },
+  {
+   "tag": "공식 문서엔?",
+   "title": "상장 서류에도\n[[현장 가스 발전]]",
+   "sub": "상장 서류에도 현장 가스 발전 계획",
+   "body": [
+    "앞으로 지을 시설은 현장 전용 가스 발전에 의존한다고 밝혔어요",
+    "AI 회사끼리 경쟁하면 [[가스 가격]]이 오를 수 있다는 위험도 적었어요"
+   ],
+   "panel": {
+    "type": "icon",
+    "icon": "server",
+    "caption": "S-1 · 2026-10-26"
+   },
+   "src": "Anthropic S-1 · TechRadar"
+  },
+  {
+   "tag": "괜찮은 걸까?",
+   "title": "찬반이\n[[팽팽]]해요",
+   "sub": "빠른 가스 vs 탄소 우려, 찬반 팽팽",
+   "body": [
+    "찬: 가스는 석탄보다 탄소가 적고, 지금 가장 빨리 전기를 만든다",
+    "반: 환경단체는 데이터센터가 15년 기후 성과를 되돌릴 수 있다고 경고"
+   ],
+   "panel": {
+    "type": "icon",
+    "icon": "warn",
+    "caption": "speed  vs  carbon"
+   },
+   "src": "HN · Sierra Club"
+  }
+ ],
+ "more": [],
+ "caption": "🍪 오늘의 개발 스낵 (11/23)\n\n전기를 기다리다 지친 AI의 선택은? 정답은 가스예요. 데이터센터 전력 구조를 분석한 글이 해커뉴스 2위에 올랐어요. 2028년 Anthropic 전력의 87%가 가스, 11%가 석탄일 거라는 추정이에요.\n\n1️⃣ 새 데이터센터를 전력망에 연결하려면 몇 년씩 기다려야 해요\n2️⃣ 그래서 발전기를 직접 두는 BYOP(Bring Your Own Power)가 대세가 됐고, 가장 빨리 세울 수 있는 게 가스예요\n3️⃣ Anthropic 상장 서류(S-1)에도 현장 전용 가스 발전 계획과 가스 가격 상승 위험이 적혀 있어요\n4️⃣ 가스가 석탄보다 탄소가 적다는 의견과, 데이터센터가 기후 성과를 되돌린다는 우려가 맞서고 있어요\n\n※ 87%·11%는 분석 글의 추정치예요.\n\n📌 저장해두고 출퇴근길에 보세요\n매일 오후 5시, @devsnack.kr\n\n#개발자 #개발뉴스 #IT뉴스 #devsnack #데이터센터"
+}
