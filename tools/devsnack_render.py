@@ -17,7 +17,11 @@ content.json:
  "caption": "..."
 }
 Icons: plane, warn, server, robot, box, chart, shield, lock, db, rocket, chip, book.
-Moods: happy, sweat, shock.  [[text]] in titles = orange highlight.
+Moods: happy, sweat, shock.
+Cover scene (optional, replaces the cover icon): "scene": {"type": "badge", "org": "NVIDIA", "name": "JENSEN HUANG", "role": "CEO", "from": "RESIGNED", "to": "RETURNED"}
+  -> staff ID card with a generic silhouette; stamp "from" flips to "to" (people/role-change stories, never a real photo).
+Panel "chart": {"type": "chart", "values": [..], "labels": [..], "num": "+31%", "label": "..."} -> rising bars (only real numbers).
+Icons also: person (generic silhouette), trend.  [[text]] in titles = orange highlight.
 """
 import json, os, random, re, sys, pathlib, html as H
 
@@ -56,6 +60,8 @@ ICONS = {
             ".KOKWWWWKOK.", ".KOKKKKKKOK.", "....KYYK....", ".....KK....."],
  'chip': ["..K.K.K.K.K...", ".KKKKKKKKKKK..", "KKhhhhhhhhhKK.", ".KhOOOOOOOhK..", "KKhOhhhhhOhKK.", ".KhOhhhhhOhK..",
           "KKhOOOOOOOhKK.", ".KhhhhhhhhhK..", ".KKKKKKKKKKK..", "..K.K.K.K.K..."],
+ 'person': ["....GGGG....", "...GGGGGG...", "...GGGGGG...", "...GGGGGG...", "....GGGG....", "............", "..GGGGGGGG..", ".GGGGGGGGGG.", "GGGGGGGGGGGG", "GGGGGGGGGGGG"],
+ 'trend': ["..........KK", ".........KOK", "........KOOK", "...K...KOK..", "..KOK.KOK...", ".KOKOKOK....", "KOK.KOK.....", "KK...K......"],
  'book': ["KKKKKKKKKKKKK.", "KWWWWWKWWWWWK.", "KWGGGWKWGGGWK.", "KWWWWWKWWWWWK.", "KWGGGWKWGGGWK.", "KWWWWWKWWWWWK.",
           "KKKKKKKKKKKKK."],
 }
@@ -141,6 +147,21 @@ def cover(c, total, date):
     side = ''
     if icon2 and icon2 in ICONS:
         side = f'<div class="pulse" style="position: absolute; left: 470px; top: 230px">{pixel_svg(ICONS[icon2], 9)}</div>'
+    scene = cv.get('scene') or {}
+    main_art = f'<div class="hover" style="position: absolute; left: 150px; top: {640 - len(icon)*isz}px">{pixel_svg(icon, isz)}</div>'
+    if scene.get('type') == 'badge':
+        side = ''
+        sil = pixel_svg(ICONS['person'], 12)
+        main_art = f'''<div class="bob" style="position: absolute; left: 120px; top: 150px; width: 330px">
+<div style="margin: 0 auto; width: 18px; height: 70px; background: {ACC}"></div>
+<div style="position: relative; box-sizing: border-box; width: 330px; padding: 26px; background: {TX}; border: 8px solid {DEEP}; box-shadow: 10px 10px 0 {ACC}; color: {DEEP}; {MONO}">
+<div style="display: flex; justify-content: space-between; font-size: 20px; font-weight: 700"><span>STAFF ID</span><span style="color: {ACC}">{H.escape(scene.get('org', ''))}</span></div>
+<div style="margin: 18px 0; height: 150px; background: #CFCBC2; display: flex; align-items: flex-end; justify-content: center; overflow: hidden">{sil}</div>
+<div style="font-size: 28px; font-weight: 700; line-height: 1.2">{H.escape(scene.get('name', ''))}</div>
+<div style="font-size: 22px; margin-top: 6px">ROLE: {H.escape(scene.get('role', ''))}</div>
+<div class="st1" style="position: absolute; left: 34px; top: 150px; transform: rotate(-12deg); padding: 6px 14px; border: 5px solid #E5534B; color: #E5534B; font-size: 30px; font-weight: 700; background: rgba(240,238,230,.85)">{H.escape(scene.get('from', ''))}</div>
+<div class="st2" style="position: absolute; left: 44px; top: 160px; transform: rotate(-8deg); padding: 6px 14px; border: 5px solid {ACC}; color: {ACC}; font-size: 34px; font-weight: 700; background: {TX}">{H.escape(scene.get('to', ''))}</div>
+</div></div>'''
     bubble = ''
     if cv.get('bubble'):
         bubble = f'''<div style="position: absolute; right: 110px; top: 300px; background: {TX}; color: {DEEP}; {MONO}; font-weight: 700; font-size: 34px; padding: 18px 26px; border: 6px solid {DEEP}; box-shadow: 6px 6px 0 {ACC}"><span class="type" style="--n: {sum(2 if ord(ch) > 0x2E80 else 1 for ch in cv['bubble'])}">{H.escape(cv['bubble'])}</span></div>'''
@@ -149,7 +170,7 @@ def cover(c, total, date):
 <div style="position: absolute; left: 0; right: 0; top: 640px; height: 220px; background: repeating-linear-gradient(90deg, {PANEL} 0 96px, #262422 96px 102px)"></div>
 <div style="position: absolute; left: 0; right: 0; top: 640px; height: 12px; background: {LINE}"></div>
 {side}
-<div class="hover" style="position: absolute; left: 150px; top: {640 - len(icon)*isz}px">{pixel_svg(icon, isz)}</div>
+{main_art}
 <div class="bob" style="position: absolute; left: 640px; top: {640 - 14*18 + 6}px">{mascot(cv.get('mood', 'happy'), 18)}</div>
 {bubble}
 <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 720px; background: linear-gradient(to bottom, rgba(18,17,16,0) 0%, rgba(18,17,16,0.92) 32%, {DEEP} 52%)"></div>
@@ -173,6 +194,12 @@ def panel(p):
         inner = f'''<div style="display: flex; gap: 10px; margin-bottom: 26px"><span style="width: 16px; height: 16px; border-radius: 50%; background: #E5534B"></span><span style="width: 16px; height: 16px; border-radius: 50%; background: #F2C14E"></span><span style="width: 16px; height: 16px; border-radius: 50%; background: #7BC47F"></span></div>
 <div style="{MONO}; font-size: 28px; line-height: 1.6">{lines}</div>'''
         return f'<div style="height: 440px; box-sizing: border-box; padding: 34px 40px; background: {DEEP}; border: 2px solid {BOX}; border-radius: 24px; overflow: hidden">{inner}</div>'
+    if t == 'chart':
+        vals = p['values']; mx = max(vals); n = len(vals); bw = int(560 / n) - 18
+        bars = ''.join(f'<div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 260px"><div class="{"barhi" if i == n - 1 else "bar"}" style="--h: {int(240 * v / mx)}px; width: {bw}px; background: {ACC if i == n - 1 else BOX}"></div><div style="{MONO}; font-size: 20px; color: {MUTED}; margin-top: 10px">{H.escape(str(p.get("labels", [""] * n)[i]))}</div></div>' for i, v in enumerate(vals))
+        return f'''<div style="height: 440px; box-sizing: border-box; padding: 36px 40px; background: {PANEL}; border: 2px solid {BOX}; border-radius: 24px; display: flex; flex-direction: column; justify-content: space-between">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 30px; color: {BODY}">{esc(p.get('label', ''))}</span><span class="pop" style="{MONO}; font-size: 72px; font-weight: 700; color: {ACC}">{H.escape(p.get('num', ''))}</span></div>
+<div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 18px">{bars}</div></div>'''
     if t == 'stat':
         return f'''<div style="height: 440px; box-sizing: border-box; padding: 40px; background: {PANEL}; border: 2px solid {BOX}; border-radius: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 18px">
 <div class="pop" style="{MONO}; font-size: 150px; font-weight: 700; color: {ACC}; line-height: 1">{H.escape(p['num'])}</div>
@@ -227,6 +254,14 @@ def outro(c, n, total):
 
 
 ANIM_CSS = """<style>
+@keyframes st1 { 0%,40% { opacity: 1 } 41%,100% { opacity: 0 } }
+.st1 { animation: st1 4.8s steps(1) infinite }
+@keyframes st2 { 0%,44% { opacity: 0; transform: rotate(-8deg) scale(2.2) } 50% { opacity: 1; transform: rotate(-8deg) scale(1.15) } 54%,100% { opacity: 1; transform: rotate(-8deg) scale(1) } }
+.st2 { animation: st2 4.8s steps(1) infinite }
+@keyframes bar { 0% { height: 0 } 40%,100% { height: var(--h) } }
+.bar { height: var(--h); animation: bar 4.8s steps(6) infinite }
+@keyframes barhi { 0%,30% { height: 0 } 60%,100% { height: var(--h) } }
+.barhi { height: var(--h); animation: barhi 4.8s steps(8) infinite }
 @keyframes tw { 0%,100% { opacity: .15 } 50% { opacity: .8 } }
 .tw { animation: tw 2.4s steps(3) infinite }
 @keyframes bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-14px) } }
