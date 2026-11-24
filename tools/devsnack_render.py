@@ -21,6 +21,10 @@ Moods: happy, sweat, shock.
 Cover scene (optional, replaces the cover icon): "scene": {"type": "badge", "org": "NVIDIA", "name": "JENSEN HUANG", "role": "CEO", "from": "RESIGNED", "to": "RETURNED"}
   -> staff ID card with a generic silhouette; stamp "from" flips to "to" (people/role-change stories, never a real photo).
 Layout: content "layout": "split" (default; top = moving screen, bottom = dark text) | "classic".
+Panel "ticker": {"type":"ticker","symbol":"NVDA","label":"엔비디아","change":"31%","notes":["..."]}  stock card + notifications sliding in.
+Panel "lineup": {"type":"lineup","label":"...","items":["Blink","WebKit","Gecko"],"new":"Ladybird","caption":"..."}  new entrant drops in.
+Panel "inbox": {"type":"inbox","app":"Kagi Mail","new":["Kagi","Welcome"],"mails":[["a","b"]],"tags":["..."]}  new mail slides in.
+Prefer these scene panels over "terminal" (terminal only for real commands).
 Panel "browser": {"type": "browser", "url": "ladybird.org", "badge": "NEW ENGINE"} -> address typed, page loads block by block (browsers, web services, launches).
 Panel "chart": {"type": "chart", "values": [..], "labels": [..], "num": "+31%", "label": "..."} -> rising bars (only real numbers).
 Cover "mascot": cookie (default) | gpu | server | robot  -> pick the character that fits the story (vary it; no brand logos).
@@ -247,6 +251,33 @@ def panel(p):
         inner = f'''<div style="display: flex; gap: 10px; margin-bottom: 26px"><span style="width: 16px; height: 16px; border-radius: 50%; background: #E5534B"></span><span style="width: 16px; height: 16px; border-radius: 50%; background: #F2C14E"></span><span style="width: 16px; height: 16px; border-radius: 50%; background: #7BC47F"></span></div>
 <div style="{MONO}; font-size: 28px; line-height: 1.6">{lines}</div>'''
         return f'<div style="height: 440px; box-sizing: border-box; padding: 34px 40px; background: {DEEP}; border: 2px solid {BOX}; border-radius: 24px; overflow: hidden">{inner}</div>'
+    if t == 'ticker':
+        toasts = ''.join(f'<div class="toast" style="animation-delay: {1.1 + i * 0.55:.2f}s; display: flex; align-items: center; gap: 14px; padding: 16px 20px; margin-bottom: 14px; background: {PANEL}; border: 2px solid {BOX}; border-radius: 16px; font-size: 26px; color: {TX}"><span style="width: 14px; height: 14px; border-radius: 50%; background: {ACC}; flex: none"></span>{esc(x)}</div>' for i, x in enumerate(p.get('notes', [])))
+        return f'''<div style="height: 440px; box-sizing: border-box; padding: 28px; background: {DEEP}; border: 2px solid {BOX}; border-radius: 24px; display: flex; gap: 26px; overflow: hidden">
+<div style="width: 330px; flex: none; box-sizing: border-box; padding: 28px; background: {PANEL}; border-radius: 20px; display: flex; flex-direction: column">
+<div style="{MONO}; font-size: 28px; color: {MUTED}">{H.escape(p.get('symbol', ''))}</div>
+<div style="margin-top: 8px; font-size: 26px; color: {BODY}">{esc(p.get('label', ''))}</div>
+<div class="pop" style="margin-top: auto; {MONO}; font-size: 96px; font-weight: 700; color: #7BC47F; line-height: 1">+{count_html(p.get('change', ''))}</div>
+<div style="margin-top: 18px; height: 120px; position: relative">{pixel_svg(ICONS['trend'], 14, 'class="rise" style="position: absolute; right: 0; bottom: 0"')}</div></div>
+<div style="flex: 1; display: flex; flex-direction: column; justify-content: center">{toasts}</div></div>'''
+    if t == 'lineup':
+        items = p.get('items', []); newi = p.get('new', '')
+        cards = ''.join(f'<div class="in-up" style="animation-delay: {0.5 + i * 0.2:.2f}s; flex: 1; height: 190px; box-sizing: border-box; padding: 20px; background: {PANEL}; border: 2px solid {BOX}; border-radius: 18px; display: flex; flex-direction: column; justify-content: space-between"><span style="{MONO}; font-size: 20px; color: {MUTED}">ENGINE</span><span style="font-size: 32px; font-weight: 700; color: {BODY}">{H.escape(x)}</span></div>' for i, x in enumerate(items))
+        cards += f'<div class="dropin" style="flex: 1.2; height: 190px; box-sizing: border-box; padding: 20px; background: {ACC}; border-radius: 18px; display: flex; flex-direction: column; justify-content: space-between; color: {DEEP}; box-shadow: 0 0 0 6px rgba(217,119,87,.3)"><span style="{MONO}; font-size: 20px; font-weight: 700">NEW ENGINE</span><span style="font-size: 34px; font-weight: 700">{H.escape(newi)}</span></div>'
+        return f'''<div style="height: 440px; box-sizing: border-box; padding: 40px 36px; background: {DEEP}; border: 2px solid {BOX}; border-radius: 24px; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden">
+<div style="font-size: 28px; color: {BODY}">{esc(p.get('label', ''))}</div>
+<div style="display: flex; gap: 18px; align-items: flex-end">{cards}</div>
+<div class="in-fade" style="animation-delay: 2.2s; {MONO}; font-size: 24px; color: {ACC}">{H.escape(p.get('caption', ''))}</div></div>'''
+    if t == 'inbox':
+        rows = ''.join(f'<div style="display: flex; gap: 18px; padding: 16px 22px; border-bottom: 1px solid {LINE}; font-size: 24px; color: {MUTED}"><b style="width: 170px; flex: none; color: {BODY}; font-weight: 500">{H.escape(m[0])}</b><span style="white-space: nowrap; overflow: hidden">{H.escape(m[1])}</span></div>' for m in p.get('mails', []))
+        nm = p.get('new', ['', ''])
+        tags = ''.join(f'<span class="in-pop" style="animation-delay: {2.0 + i * 0.3:.2f}s; display: inline-block; margin-right: 12px; padding: 8px 16px; background: {ACC}; color: {DEEP}; border-radius: 10px; font-size: 22px; font-weight: 700">{H.escape(x)}</span>' for i, x in enumerate(p.get('tags', [])))
+        return f'''<div style="height: 440px; box-sizing: border-box; background: {DEEP}; border: 2px solid {BOX}; border-radius: 24px; overflow: hidden; display: flex">
+<div style="width: 190px; flex: none; background: {PANEL}; padding: 26px 20px; box-sizing: border-box; {MONO}; font-size: 22px; color: {MUTED}; line-height: 2.2"><div style="color: {TX}; font-weight: 700; font-size: 26px">{H.escape(p.get('app', 'Mail'))}</div><div style="color: {ACC}">▸ Inbox</div><div>Sent</div><div>Archive</div></div>
+<div style="flex: 1; position: relative">
+<div class="newmail" style="display: flex; gap: 18px; padding: 18px 22px; background: rgba(217,119,87,.16); border-left: 6px solid {ACC}; font-size: 26px; color: {TX}"><b style="width: 170px; flex: none">{H.escape(nm[0])}</b><span style="white-space: nowrap; overflow: hidden">{H.escape(nm[1])}</span></div>
+{rows}
+<div style="position: absolute; left: 22px; bottom: 22px">{tags}</div><div style="position: absolute; right: 18px; bottom: 26px; {MONO}; font-size: 18px; color: {MUTED}; border: 1px solid {BOX}; border-radius: 8px; padding: 4px 10px">예시 화면</div></div></div>'''
     if t == 'browser':
         url = p.get('url', ''); un = len(url)
         blocks = ''.join(f'<div class="blk" style="animation-delay: {1.3 + i * 0.22:.2f}s; height: {h}px; width: {wd}%; background: {c}; margin-bottom: 14px"></div>' for i, (h, wd, c) in enumerate([(44, 70, TX), (18, 92, BOX), (18, 84, BOX), (18, 60, BOX), (90, 100, ACC)]))
@@ -345,6 +376,14 @@ def outro(c, n, total):
 
 
 ANIM_CSS = """<style>
+@keyframes toast { 0% { transform: translateX(120%); opacity: 0 } 100% { transform: none; opacity: 1 } }
+.toast { opacity: 0; animation: toast .45s steps(5) both }
+@keyframes rise { 0% { transform: translateY(60px); opacity: 0 } 100% { transform: none; opacity: 1 } }
+.rise { animation: rise .8s steps(6) .5s both }
+@keyframes dropin { 0%,40% { transform: translateY(-420px) } 52% { transform: translateY(12px) } 58% { transform: none } 100% { transform: none } }
+.dropin { animation: dropin 4.8s steps(1) both; animation-timing-function: steps(12) }
+@keyframes newmail { 0%,20% { transform: translateY(-100%); opacity: 0; max-height: 0 } 32% { transform: none; opacity: 1; max-height: 120px } 100% { opacity: 1; max-height: 120px } }
+.newmail { animation: newmail 4.8s steps(8) both }
 @keyframes twl { from { max-width: 0 } to { max-width: calc(var(--n) * 1ch) } }
 .tw-line { display: inline-block; overflow: hidden; vertical-align: top; max-width: 0; animation-name: twl; animation-fill-mode: both }
 @keyframes load { 0%,22% { width: 0 } 60% { width: 70% } 80%,100% { width: 100% } }
