@@ -103,11 +103,8 @@ def pixel_svg(rows, size, extra=''):
 
 
 def mascot(mood, size):
-    rows = list(MASCOT['base'])
-    rows[8] = MOUTH.get(mood, MOUTH['happy'])
-    if mood == 'shock':
-        rows[5] = "KLCWWKCCCWWKCLK."; rows[6] = "KLCWKKCCCWKKCLK."
-    svg = pixel_svg(rows, size)
+    import cookie_pixel  # cute 22x22 cookie (2026-11-25); keeps the old 16-cell footprint
+    svg = cookie_pixel.svg(mood if mood in ('happy', 'sweat', 'shock') else 'happy', size * 16 / 22)
     if mood == 'sweat':
         drop = pixel_svg([".K.", "KBK", "KBK", ".K."], size)
         svg = f'<div style="position: relative; display: inline-block">{svg}<div class="drop" style="position: absolute; right: {-size*2}px; top: {size*2}px">{drop}</div></div>'

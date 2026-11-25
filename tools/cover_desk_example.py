@@ -70,9 +70,9 @@ def label(x, y, text, bg, fg, size, rot=0):
     return (f'<div style="position:absolute;left:{x}px;top:{y}px;padding:8px 16px;background:{bg};color:{fg};border:5px solid {DEEP};'
             f'box-shadow:6px 6px 0 {DEEP};font:900 {size}px/1 \'Pretendard\',sans-serif;transform:rotate({rot}deg)">{text}</div>')
 
-TITLES = [("이력서 100번 쓰고", "또 떨어졌다면"), ("만든 사람은", "이걸로 취업했어요"), ("서류 광탈 끝내는", "무료 AI 비서")]
+TITLES = [("이력서 100번 쓰고", "또 떨어졌다면", "sweat"), ("만든 사람은", "이걸로 취업했어요", "happy"), ("서류 광탈 끝내는", "무료 AI 비서", "happy")]
 
-def page(l1, l2):
+def page(l1, l2, mood='happy'):
     stars = ''.join(f'<div style="position:absolute;left:{x}px;top:{y}px;width:10px;height:10px;background:#3A3430"></div>' for x in range(30, 1080, 120) for y in range(40, 1150, 120))
     screen = f'''<div style="position:absolute;left:205px;top:340px;width:670px">
       <div style="font:700 34px/1 'JetBrains Mono',monospace;color:#8A847B;letter-spacing:.12em">&gt; JOB QUEST</div>
@@ -95,8 +95,7 @@ def page(l1, l2):
    <div style="position:absolute;left:24px;top:110px;padding:4px 10px;border:6px solid #E5534B;color:#E5534B;font:900 38px/1 'Pretendard',sans-serif;transform:rotate(-14deg)">불합격</div></div>
  <div style="position:absolute;left:470px;top:1080px">{laptop()}
    {label(30, 40, 'career-ops', ACC, DEEP, 30, -6)}{label(220, 110, 'AI 취업비서', '#1F1E1D', '#F2C14E', 26, 5)}{label(40, 130, 'GO', '#5FD38D', DEEP, 28, -4)}</div>
- <div style="position:absolute;left:210px;top:930px">{R.mascot('happy', 17)}</div>
- <div style="position:absolute;left:226px;top:1020px">{glasses}</div>
+ <div style="position:absolute;left:190px;top:900px">{R.mascot(mood, 19)}</div>
  <div style="position:absolute;left:0;right:0;top:1250px;bottom:0;background:linear-gradient(rgba(18,17,16,0),rgba(18,17,16,.9) 30%,#121110)"></div>
  <div style="position:absolute;left:70px;top:1430px;font:700 40px/1 'JetBrains Mono',monospace;color:#E9E3D9">AI TIP</div>
  <h1 style="position:absolute;left:66px;right:40px;top:1490px;margin:0;font-size:112px;line-height:1.14;font-weight:900;letter-spacing:-0.045em">{l1}<br><span class="hl">{l2}</span></h1>
