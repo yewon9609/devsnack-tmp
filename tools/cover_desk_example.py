@@ -1,59 +1,112 @@
 import sys, pathlib
 sys.path.insert(0, '/home/claude/devsnack-tmp/tools')
 import devsnack_render as R
-ACC = R.ACC
-TITLES = [
-    ("AI TIP", "이력서 100번 쓰고", "<span class='hl'>또 떨어졌다면</span>"),
-    ("AI TIP", "만든 사람은", "<span class='hl'>이걸로 취업했어요</span>"),
-    ("AI TIP", "서류 광탈 끝내는", "<span class='hl'>무료 AI 비서</span>"),
-]
-def page(label, l1, l2):
-    chips = ''.join(f'<div style="position:absolute;left:{x}px;top:{y}px;width:{s}px;height:{s*0.8}px;border-radius:40%;background:radial-gradient(circle at 35% 30%,#7A4A2A,#3B2010)"></div>' for x, y, s in [(70,80,46),(190,60,38),(250,150,44),(110,190,40),(200,240,30),(60,250,28)])
-    cookie = f'''<div style="position:absolute;left:150px;top:1010px;width:330px;height:330px">
-      <div style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,#F6C27A,#D9914A 55%,#A8642A);box-shadow:inset -20px -26px 40px rgba(90,40,10,.45),0 30px 40px rgba(0,0,0,.45)"></div>
-      {chips}
-      <div style="position:absolute;left:40px;top:120px;width:250px;height:70px;display:flex;justify-content:space-between">
-        <div style="width:110px;height:70px;border:12px solid #1C1A19;border-radius:18px;background:rgba(255,255,255,.18);box-sizing:border-box"></div>
-        <div style="width:110px;height:70px;border:12px solid #1C1A19;border-radius:18px;background:rgba(255,255,255,.18);box-sizing:border-box"></div></div>
-      <div style="position:absolute;left:150px;top:138px;width:30px;height:12px;background:#1C1A19"></div>
-      <div style="position:absolute;left:78px;top:142px;font:900 40px/1 sans-serif;color:#1C1A19">&gt;</div><div style="position:absolute;left:222px;top:142px;font:900 40px/1 sans-serif;color:#1C1A19">&lt;</div>
-      <div style="position:absolute;left:120px;top:225px;width:90px;height:34px;border-bottom:12px solid #1C1A19;border-radius:0 0 60px 60px"></div></div>'''
-    laptop = f'''<div style="position:absolute;left:420px;top:1150px;width:400px;height:230px;transform:perspective(900px) rotateX(8deg) rotateY(-14deg)">
-      <div style="position:absolute;inset:0;border-radius:24px;background:linear-gradient(135deg,#E9E6E1,#BDB8B0);box-shadow:inset -10px -14px 24px rgba(0,0,0,.25),0 26px 30px rgba(0,0,0,.45)"></div>
-      <div style="position:absolute;left:40px;top:40px;padding:10px 18px;background:{ACC};border-radius:14px;transform:rotate(-8deg);font:900 30px/1 'Pretendard',sans-serif;color:#1F1E1D">career-ops</div>
-      <div style="position:absolute;left:230px;top:110px;padding:8px 16px;background:#1F1E1D;border-radius:14px;transform:rotate(6deg);font:900 26px/1 monospace;color:#F2C14E">AI 취업비서</div>
-      <div style="position:absolute;left:70px;top:140px;width:70px;height:70px;border-radius:50%;background:#5FD38D;transform:rotate(-6deg);font:900 26px/70px sans-serif;color:#1F1E1D;text-align:center">GO</div></div>'''
-    monitor = f'''<div style="position:absolute;left:90px;top:300px;width:900px;height:760px;border-radius:56px;background:linear-gradient(160deg,#F1ECE4,#CFC7BB 70%,#B7AEA0);box-shadow:inset -18px -24px 40px rgba(0,0,0,.25),inset 14px 14px 30px rgba(255,255,255,.6),0 40px 60px rgba(0,0,0,.5)">
-      <div style="position:absolute;left:60px;top:56px;right:60px;bottom:120px;border-radius:34px;background:radial-gradient(circle at 40% 30%,#2E2A27,#141211);box-shadow:inset 0 0 40px rgba(0,0,0,.8)">
-        <div style="position:absolute;left:54px;top:40px;font:700 34px/1 'JetBrains Mono',monospace;color:#8A847B;letter-spacing:.1em">JOB QUEST</div>
-        <div style="position:absolute;left:54px;top:110px;right:54px;padding:26px 30px;border-radius:20px;background:#F4F1EA;color:#1F1E1D;box-shadow:0 10px 0 rgba(0,0,0,.35)">
-          <div style="font:900 40px/1.1 'Pretendard',sans-serif">B사 · 서버 개발</div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px"><span style="font:900 86px/1 'JetBrains Mono',monospace;color:#2FA765">4.6<span style="font-size:40px;color:#8A847B"> / 5</span></span>
-          <span style="padding:8px 20px;border:8px solid #2FA765;color:#2FA765;border-radius:14px;font:900 52px/1 'Pretendard',sans-serif;transform:rotate(-8deg)">지원 GO</span></div></div>
-        <div style="position:absolute;left:54px;top:400px;right:54px;padding:20px 30px;border-radius:20px;background:#3A3532;color:#BFB8AD;display:flex;justify-content:space-between;align-items:center;font:800 36px/1 'Pretendard',sans-serif">
-          <span>A사 · 백엔드 <span style="font-family:'JetBrains Mono';color:#E5534B">3.2</span></span><span style="padding:6px 14px;border:6px solid #E5534B;color:#E5534B;border-radius:12px;transform:rotate(6deg)">비추</span></div>
-      </div>
-      <div style="position:absolute;right:80px;bottom:44px;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFB08A,{ACC})"></div>
-      <div style="position:absolute;left:80px;bottom:52px;width:240px;height:16px;border-radius:8px;background:rgba(0,0,0,.18)"></div></div>'''
-    props = f'''<div style="position:absolute;left:860px;top:1080px;width:150px;height:190px;border-radius:20px 20px 36px 36px;background:linear-gradient(90deg,#E8E3DB,#BEB6AA);box-shadow:0 20px 30px rgba(0,0,0,.4)">
-        <div style="position:absolute;right:-48px;top:40px;width:60px;height:80px;border:16px solid #CFC7BB;border-left:none;border-radius:0 40px 40px 0"></div></div>
-      <div style="position:absolute;left:30px;top:1260px;width:190px;height:240px;background:#F4F1EA;transform:rotate(-10deg);box-shadow:0 18px 24px rgba(0,0,0,.4)">
-        <div style="position:absolute;left:28px;top:70px;padding:6px 14px;border:7px solid #E5534B;color:#E5534B;font:900 40px/1 'Pretendard',sans-serif;transform:rotate(-14deg)">불합격</div></div>'''
+ACC = R.ACC; DEEP = '#121110'
+P = 10
+
+def svg(cells, w, h, p=P):
+    """cells: dict (x,y)->color"""
+    r = ''.join(f'<rect x="{x*p}" y="{y*p}" width="{p}" height="{p}" fill="{c}"/>' for (x, y), c in cells.items())
+    return f'<svg width="{w*p}" height="{h*p}" viewBox="0 0 {w*p} {h*p}" shape-rendering="crispEdges" style="display:block">{r}</svg>'
+
+def box(w, h, fill, hi, lo, out=DEEP, notch=2):
+    c = {}
+    for y in range(h):
+        for x in range(w):
+            # notched corners
+            if (x < notch and y < notch - x) or (x >= w - notch and y < notch - (w - 1 - x)) or (x < notch and y >= h - (notch - x)) or (x >= w - notch and y >= h - (notch - (w - 1 - x))):
+                continue
+            edge = x == 0 or y == 0 or x == w - 1 or y == h - 1 or (x < notch and y in (notch - x, h - 1 - (notch - x))) or (x >= w - notch and y in (notch - (w - 1 - x), h - 1 - (notch - (w - 1 - x))))
+            if edge: c[(x, y)] = out
+            elif x <= 2 or y <= 2: c[(x, y)] = hi
+            elif x >= w - 4 or y >= h - 4: c[(x, y)] = lo
+            else: c[(x, y)] = fill
+    return c
+
+def monitor():
+    W, H = 86, 70
+    c = box(W, H, '#E9E1D3', '#FBF6EC', '#B9AD9A')
+    for y in range(6, 54):
+        for x in range(7, 79):
+            c[(x, y)] = '#1B1917' if y % 3 else '#211E1B'
+    for x in range(6, 80): c[(x, 5)] = '#9C9282'; c[(x, 54)] = '#FBF6EC'
+    for y in range(5, 55): c[(6, y)] = '#9C9282'; c[(79, y)] = '#FBF6EC'
+    for x in range(10, 30): c[(x, 61)] = '#B9AD9A'
+    c[(74, 61)] = ACC; c[(75, 61)] = ACC; c[(74, 62)] = '#B5543A'; c[(75, 62)] = ACC
+    return svg(c, W, H)
+
+def desk():
+    W, H = 112, 74; c = {}
+    for y in range(H):
+        for x in range(W):
+            c[(x, y)] = '#F0A76B' if y < 2 else ('#C9824E' if y < 6 else ('#A8683C' if (y // 9) % 2 else '#B5733F'))
+    for x in range(W): c[(x, 6)] = '#7A4A28'
+    return svg(c, W, H)
+
+def laptop():
+    W, H = 44, 22
+    c = box(W, H, '#C9C4BC', '#EDEAE4', '#9E988F', notch=2)
+    return svg(c, W, H)
+
+def mug():
+    W, H = 16, 18; c = box(13, 18, '#E9E1D3', '#FBF6EC', '#B9AD9A', notch=1)
+    for y in range(5, 12):
+        c[(13, y)] = DEEP if y in (5, 11) else None; c[(15, y)] = DEEP
+        if y in (5, 11): c[(14, y)] = DEEP
+    c = {k: v for k, v in c.items() if v}
+    for y in range(6, 11): c[(14, y)] = '#B9AD9A'
+    return svg(c, W, H)
+
+def paper():
+    W, H = 20, 26; c = box(W, H, '#F4F1EA', '#FFFFFF', '#D8D2C6', notch=1)
+    for x in range(3, 11): c[(x, 3)] = ACC; c[(x, 4)] = ACC
+    for row in (8, 11, 14, 17):
+        for x in range(3, 15 if row != 17 else 10): c[(x, row)] = '#BDB6A9'
+    return svg(c, W, H)
+
+glasses = R.pixel_svg(["KKKKKK..KKKKKK", "KWWWWKKKKWWWWK", "KWKKWK..KWKKWK", "KKKKKK..KKKKKK"], 16)
+
+def label(x, y, text, bg, fg, size, rot=0):
+    return (f'<div style="position:absolute;left:{x}px;top:{y}px;padding:8px 16px;background:{bg};color:{fg};border:5px solid {DEEP};'
+            f'box-shadow:6px 6px 0 {DEEP};font:900 {size}px/1 \'Pretendard\',sans-serif;transform:rotate({rot}deg)">{text}</div>')
+
+TITLES = [("이력서 100번 쓰고", "또 떨어졌다면"), ("만든 사람은", "이걸로 취업했어요"), ("서류 광탈 끝내는", "무료 AI 비서")]
+
+def page(l1, l2):
+    stars = ''.join(f'<div style="position:absolute;left:{x}px;top:{y}px;width:10px;height:10px;background:#3A3430"></div>' for x in range(30, 1080, 120) for y in range(40, 1150, 120))
+    screen = f'''<div style="position:absolute;left:205px;top:340px;width:670px">
+      <div style="font:700 34px/1 'JetBrains Mono',monospace;color:#8A847B;letter-spacing:.12em">&gt; JOB QUEST</div>
+      <div style="margin-top:26px;padding:22px 26px;background:#F4F1EA;color:{DEEP};border:6px solid #000;box-shadow:8px 8px 0 #000">
+        <div style="font:900 40px/1.1 'Pretendard',sans-serif">B사 · 서버 개발</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px">
+          <span style="font:800 84px/1 'JetBrains Mono',monospace;color:#2FA765">4.6<span style="font-size:38px;color:#8A847B"> /5</span></span>
+          <span style="padding:6px 18px;border:7px solid #2FA765;color:#2FA765;font:900 50px/1 'Pretendard',sans-serif;transform:rotate(-7deg)">지원 GO</span></div></div>
+      <div style="margin-top:28px;padding:16px 26px;background:#2E2A27;border:6px solid #000;display:flex;justify-content:space-between;align-items:center;font:800 36px/1 'Pretendard',sans-serif;color:#BFB8AD">
+        <span>A사 · 백엔드 <span style="font-family:'JetBrains Mono';color:#E5534B">3.2</span></span>
+        <span style="padding:4px 12px;border:6px solid #E5534B;color:#E5534B;transform:rotate(6deg)">비추</span></div></div>'''
     return f'''<!doctype html><html lang="ko"><head><meta charset="utf-8">{R.font_css()}<style>body{{margin:0}} .hl{{color:{ACC}}}</style></head><body>
-<div style="width:1080px;height:1920px;position:relative;overflow:hidden;background:#2A2522;{R.SANS};color:#fff;word-break:keep-all">
- <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 2px,transparent 2px),linear-gradient(90deg,rgba(255,255,255,.05) 2px,transparent 2px);background-size:60px 60px"></div>
- <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 35%,rgba(217,119,87,.28),rgba(0,0,0,0) 60%)"></div>
- <div style="position:absolute;left:-40px;right:-40px;top:1240px;height:700px;background:linear-gradient(#C9824E,#8E5530);box-shadow:inset 0 30px 40px rgba(255,220,180,.25)"></div>
- {monitor}{props}{laptop}{cookie}
- <div style="position:absolute;left:0;right:0;top:1180px;bottom:0;background:linear-gradient(rgba(18,17,16,0),rgba(18,17,16,.92) 38%,#121110)"></div>
- <div style="position:absolute;left:70px;top:1415px;font:700 40px/1 'Pretendard',sans-serif;color:#E9E3D9;letter-spacing:.02em">{label}</div>
- <h1 style="position:absolute;left:66px;right:40px;top:1475px;margin:0;font-size:112px;line-height:1.14;font-weight:900;letter-spacing:-0.045em;text-shadow:0 6px 20px rgba(0,0,0,.6)">{l1}<br>{l2}</h1>
+<div style="width:1080px;height:1920px;position:relative;overflow:hidden;background:#24201D;{R.SANS};color:#fff;word-break:keep-all">
+ {stars}
+ <div style="position:absolute;left:-20px;top:1180px">{desk()}</div>
+ <div style="position:absolute;left:110px;top:240px">{monitor()}</div>
+ {screen}
+ <div style="position:absolute;left:840px;top:1010px">{mug()}</div>
+ <div style="position:absolute;left:40px;top:1110px;transform:rotate(-8deg)">{paper()}
+   <div style="position:absolute;left:24px;top:110px;padding:4px 10px;border:6px solid #E5534B;color:#E5534B;font:900 38px/1 'Pretendard',sans-serif;transform:rotate(-14deg)">불합격</div></div>
+ <div style="position:absolute;left:470px;top:1080px">{laptop()}
+   {label(30, 40, 'career-ops', ACC, DEEP, 30, -6)}{label(220, 110, 'AI 취업비서', '#1F1E1D', '#F2C14E', 26, 5)}{label(40, 130, 'GO', '#5FD38D', DEEP, 28, -4)}</div>
+ <div style="position:absolute;left:210px;top:930px">{R.mascot('happy', 17)}</div>
+ <div style="position:absolute;left:226px;top:1020px">{glasses}</div>
+ <div style="position:absolute;left:0;right:0;top:1250px;bottom:0;background:linear-gradient(rgba(18,17,16,0),rgba(18,17,16,.9) 30%,#121110)"></div>
+ <div style="position:absolute;left:70px;top:1430px;font:700 40px/1 'JetBrains Mono',monospace;color:#E9E3D9">AI TIP</div>
+ <h1 style="position:absolute;left:66px;right:40px;top:1490px;margin:0;font-size:112px;line-height:1.14;font-weight:900;letter-spacing:-0.045em">{l1}<br><span class="hl">{l2}</span></h1>
 </div></body></html>'''
+
 from playwright.sync_api import sync_playwright
 with sync_playwright() as p:
     exe = R.chrome(); b = p.chromium.launch(executable_path=exe) if exe else p.chromium.launch()
     pg = b.new_page(viewport={'width': 1080, 'height': 1920})
     for i, t in enumerate(TITLES, 1):
-        f = pathlib.Path(f'/home/claude/cover2/c{i}.html'); f.write_text(page(*t), encoding='utf-8')
-        pg.goto(f'file://{f}'); pg.wait_for_timeout(400); pg.screenshot(path=f'/home/claude/cover2/cover{i}.png')
+        f = pathlib.Path(f'/home/claude/cover3/c{i}.html'); f.write_text(page(*t), encoding='utf-8')
+        pg.goto(f'file://{f}'); pg.wait_for_timeout(400); pg.screenshot(path=f'/home/claude/cover3/cover{i}.png')
     b.close()
