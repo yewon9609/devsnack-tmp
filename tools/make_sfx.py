@@ -151,11 +151,28 @@ def main():
             n = len(w.get('items', []))
             if w.get('type') == 'widths':
                 put('twinkle', t0 + d0 + (n - 1) * 0.35 + 0.3)
+            elif w.get('type') == 'score':
+                for i, it in enumerate(w['items']):
+                    put('twinkle' if it[1] >= 4.0 else 'bump', t0 + d0 + i * w.get('step', 1.6) + 0.8)
+            elif w.get('type') == 'docs':
+                for i in range(n):
+                    put('blip' + 'ABC'[i % 3], t0 + d0 + i * w.get('step', 0.4))
+            elif w.get('type') == 'submit':
+                put('blipA', t0 + d0 + 0.75)
+                put('twinkle', t0 + d0 + w.get('gap', 1.6))
+            elif w.get('type') == 'checklist':
+                put('twinkle', t0 + d0 + (n - 1) * w.get('step', 0.45) + 0.25)
+            elif w.get('type') == 'scrap':
+                put('bump', t0 + d0 + 0.5)
+                put('twinkle', t0 + d0 + w.get('gap', 1.4))
             elif w.get('type') == 'pipeline':
                 put('scale', t0 + d0)
             elif w.get('type') == 'grill':
                 for i in range(n):
-                    put('blip' + 'ABC'[i % 3], t0 + d0 + i * 0.55)
+                    put('blip' + 'ABC'[i % 3], t0 + d0 + i * w.get('step', 0.55))
+        elif typ == 'g_outro' and sc.get('prop') == 'share':
+            put('jump', t0 + 0.9)
+            put('victory', t0 + 0.3)
         elif typ == 'g_outro':
             put('door', t0 + 0.5)
             put('victory', t0 + 1.3)
