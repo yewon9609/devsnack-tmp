@@ -316,17 +316,23 @@ def game_html(sc):
     base = night() if theme == 'night' else (dawn() if theme == 'dawn' else (day() if theme == 'day' else (dawn(True) if theme == 'city' else bricks() + torch(90, 640) + torch(892, 640))))
     if t == 'g_intro' and sc.get('prop') == 'papers':
         import random
-        rnd = random.Random(3); sheets = ''
-        for k in range(16):
-            x = rnd.randint(40, 860); r = rnd.randint(-25, 25); dl = k * 0.12
-            sheets += (f'<div class="fall" style="animation-delay: {dl:.2f}s; position: absolute; left: {x}px; top: {rnd.randint(-40, 120)}px; width: 150px; height: 190px; background: #F4F1EA; border: 5px solid {DEEP}; transform: rotate({r}deg); --r: {r}deg; --y: {rnd.randint(300, 520)}px">'
-                       f'<div style="margin: 18px 16px 0; height: 12px; background: {ACC}"></div>' + ''.join(f'<div style="margin: 12px 16px 0; height: 8px; background: #C9C3B8; width: {rnd.randint(60, 110)}px"></div>' for _ in range(5)) + '</div>')
-        counter = (f'<div class="in-pop" style="animation-delay: .2s; position: absolute; left: 0; right: 0; top: 200px; text-align: center; {MONO}; font-size: 40px; font-weight: 700; color: #E5534B">지원 {R.count_html("100")}번째…</div>'
-                   f'<h1 style="position: absolute; left: 70px; right: 70px; top: 270px; margin: 0; text-align: center; font-size: 96px; line-height: 1.15; font-weight: 700; letter-spacing: -0.03em">{R.lines_in(sc.get("title", ""), 0.4, 0.2)}</h1>')
-        inner = (hud(sc.get('stage', 'STAGE 1-1'), 0) + counter + f'<div style="position: absolute; left: 0; right: 0; top: 520px; height: 680px; overflow: hidden">{sheets}</div>' +
-                 f'<div class="shake" style="animation-delay: 1.2s; position: absolute; left: 444px; top: 960px">{R.mascot("sweat", 12)}</div>' +
-                 f'<div style="position: absolute; left: 0; right: 0; top: 1150px; height: 14px; background: #3A2A3E"></div>' + slots(icons, 0, top=1200))
-        sc.setdefault('sub_top', 1480)
+        rnd = random.Random(3)
+        def sheet(x, y, r, stamp=''):
+            lines = ''.join(f'<div style="margin: 12px 18px 0; height: 9px; background: #C9C3B8; width: {rnd.randint(70, 130)}px"></div>' for _ in range(5))
+            st = (f'<div style="position: absolute; left: 30px; top: 80px; padding: 4px 12px; border: 6px solid #E5534B; color: #E5534B; font-size: 34px; font-weight: 900; transform: rotate(-14deg)">{stamp}</div>' if stamp else '')
+            return (f'<div style="position: absolute; left: {x}px; top: {y}px; width: 180px; height: 230px; background: #F4F1EA; border: 6px solid {DEEP}; transform: rotate({r}deg)">'
+                    f'<div style="margin: 20px 18px 0; height: 14px; background: {ACC}; width: 90px"></div>{lines}{st}</div>')
+        pile = ''.join(sheet(rnd.randint(80, 780), rnd.randint(520, 760), rnd.randint(-30, 30)) for k in range(13)) + sheet(120, 640, -12, '불합격') + sheet(720, 600, 14, '불합격') + sheet(430, 700, 4, '불합격')
+        bubble = (f'<div style="position: absolute; left: 600px; top: 300px; background: {TX}; color: {DEEP}; font-size: 64px; font-weight: 900; padding: 14px 30px; border: 8px solid {DEEP}; box-shadow: 8px 8px 0 #E5534B">또 탈락-!</div>'
+                  f'<div style="position: absolute; left: 640px; top: 400px; width: 0; height: 0; border-left: 24px solid transparent; border-right: 24px solid transparent; border-top: 30px solid {DEEP}"></div>')
+        counter = f'<div style="position: absolute; left: 70px; top: 230px; {MONO}; font-size: 44px; font-weight: 700; color: #E5534B">지원 100번째…</div>'
+        cookie = f'<div class="shake" style="animation-delay: .6s; position: absolute; left: 380px; top: 360px">{R.mascot("sweat", 15)}</div>'
+        fade = f'<div style="position: absolute; left: 0; right: 0; top: 880px; height: 260px; background: linear-gradient(rgba(18,17,16,0), {DEEP})"></div><div style="position: absolute; left: 0; right: 0; top: 1140px; bottom: 0; background: {DEEP}"></div>'
+        label = f'<div style="position: absolute; left: 70px; top: 1150px; padding: 8px 24px; border: 3px solid {ACC}; border-radius: 999px; color: {ACC}; {MONO}; font-size: 34px; font-weight: 700">{H.escape(sc.get("label", "AI TIP"))}</div>'
+        title = f'<h1 style="position: absolute; left: 70px; right: 60px; top: 1235px; margin: 0; font-size: 104px; line-height: 1.18; font-weight: 900; letter-spacing: -0.04em">{R.br(sc.get("title", ""))}</h1>'
+        inner = (f'<div style="position: absolute; left: 70px; right: 70px; top: 90px; display: flex; justify-content: space-between; {MONO}; font-size: 34px; font-weight: 700"><span style="color: #E5534B">♥♡♡</span><span style="letter-spacing: .12em">{H.escape(sc.get("stage", ""))}</span><span style="color: #F2C14E">★ 00/04</span></div>'
+                 + counter + pile + cookie + bubble + fade + label + title)
+        sc.setdefault('sub_top', 1590)
     elif t == 'g_outro' and sc.get('prop') == 'share':
         plane = R.pixel_svg(["..........KK", "........KKWK", "......KKWWK.", "....KKWWWK..", "..KKWWWWK...", "KKWWWWWWK...", "..KKKWWK....", "....KKWK....", "......KK...."], 14)
         inner = (hud(sc.get('stage', 'STAGE 1-1'), 4) + slots(icons, 4) +
